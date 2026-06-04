@@ -1,0 +1,68 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: dark;
+  @include mat.theme((
+    color: (
+      primary: mat.$magenta-palette,
+      tertiary: mat.$green-palette,
+    ),
+    typography: Poppins,
+    density: 0,
+  ));
+}
+
+/* ===== Paleta de marca: Agua Cristalina (neón del logo) ===== */
+:root {
+  --ac-bg: #0b0b12;
+  --ac-bg-2: #11111c;
+  --ac-surface: #16161f;
+  --ac-surface-2: #1f1f2d;
+  --ac-border: #2a2a3a;
+
+  --ac-verde: #5cf64a;
+  --ac-amarillo: #ffe14d;
+  --ac-magenta: #ff2e8b;
+  --ac-naranja: #ff7a1a;
+
+  --ac-text: #ffffff;
+  --ac-text-muted: #aeaec2;
+
+  --ac-gradient: linear-gradient(90deg, #5cf64a, #ffe14d, #ff2e8b, #ff7a1a);
+  --ac-gradient-diag: linear-gradient(135deg, #5cf64a 0%, #ffe14d 28%, #ff2e8b 64%, #ff7a1a 100%);
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Poppins, Roboto, "Helvetica Neue", sans-serif;
+  background: var(--ac-bg);
+  color: var(--ac-text);
+}
+
+.spacer { flex: 1 1 auto; }
+
+/* Texto con degradado de marca */
+.texto-gradiente {
+  background: var(--ac-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Botón con degradado de marca */
+.btn-gradiente {
+  background: var(--ac-gradient-diag) !important;
+  color: #0b0b12 !important;
+  font-weight: 700 !important;
+  border: none !important;
+}
+
+/* Scrollbar oscura */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #33334a; border-radius: 8px; }
+::-webkit-scrollbar-track { background: var(--ac-bg); }
+
+/* SweetAlert2 en modo oscuro */
+.swal2-popup { background: var(--ac-surface) !important; color: var(--ac-text) !important; }

@@ -1,0 +1,17 @@
+<mat-toolbar class="topbar">
+  <span class="marca texto-gradiente">Agua Cristalina</span>
+  <span class="sep">· Administración</span>
+  <span class="spacer"></span>
+  <span class="usuario">{{ userContext.user$.value?.nombre }}</span>
+  <button matIconButton (click)="salir()" title="Cerrar sesión"><mat-icon>logout</mat-icon></button>
+</mat-toolbar>
+
+<div class="cuerpo">
+  <nav class="menu">
+    <a routerLink="/main/dashboard" routerLinkActive="activo"><mat-icon>dashboard</mat-icon> Dashboard</a>
+    <a routerLink="/main/cotizaciones" routerLinkActive="activo"><mat-icon>request_quote</mat-icon> Cotizaciones</a>
+    <a routerLink="/main/finanzas" routerLinkActive="activo"><mat-icon>payments</mat-icon> Finanzas</a>
+    <a routerLink="/main/catalogo" routerLinkActive="activo"><mat-icon>library_music</mat-icon> Catálogo</a>
+  </nav>
+  <main class="contenido"><router-outlet /></main>
+</div>

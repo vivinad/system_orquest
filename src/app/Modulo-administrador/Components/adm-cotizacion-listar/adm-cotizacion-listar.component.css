@@ -1,0 +1,8 @@
+h1 { margin-top: 0; }
+.filtros { margin-bottom: 16px; }
+.panel { background: var(--ac-surface); border: 1px solid var(--ac-border); padding: 8px; }
+.tabla { width: 100%; background: transparent; }
+.warn { color: var(--ac-amarillo); vertical-align: middle; font-size: 18px; height: 18px; width: 18px; }
+.sel-estado { width: 150px; }
+.vacio { color: var(--ac-text-muted); padding: 24px; text-align: center; }
+small { color: var(--ac-text-muted); }
