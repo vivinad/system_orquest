@@ -1,0 +1,58 @@
+<h1>Finanzas</h1>
+
+<div class="kpis">
+  <mat-card class="kpi"><span class="label">Ingresos</span><span class="valor ing">{{ pen(resumen?.ingresos) }}</span></mat-card>
+  <mat-card class="kpi"><span class="label">Gastos</span><span class="valor gas">{{ pen(resumen?.gastos) }}</span></mat-card>
+  <mat-card class="kpi"><span class="label">Balance</span><span class="valor bal">{{ pen(resumen?.balance) }}</span></mat-card>
+</div>
+
+<div class="grid">
+  <mat-card class="panel">
+    <table mat-table [dataSource]="lista" class="tabla">
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let f">{{ f.fecha }}</td>
+      </ng-container>
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef>Descripción</th>
+        <td mat-cell *matCellDef="let f">{{ f.descripcion }}<br><small>{{ f.categoria }}</small></td>
+      </ng-container>
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let f"><span class="chip" [class.gasto]="f.tipo === 'gasto'">{{ f.tipo }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="monto">
+        <th mat-header-cell *matHeaderCellDef>Monto</th>
+        <td mat-cell *matCellDef="let f" [class.rojo]="f.tipo === 'gasto'">
+          {{ f.tipo === 'gasto' ? '-' : '+' }}{{ pen(f.monto) }}
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+    </table>
+  </mat-card>
+
+  <mat-card class="form">
+    <h3>Registrar movimiento</h3>
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo</mat-label>
+      <mat-select [(ngModel)]="nuevo.tipo">
+        <mat-option value="ingreso">Ingreso</mat-option>
+        <mat-option value="gasto">Gasto</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <input matInput [(ngModel)]="nuevo.descripcion">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Categoría</mat-label>
+      <input matInput [(ngModel)]="nuevo.categoria">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Monto (S/)</mat-label>
+      <input matInput type="number" [(ngModel)]="nuevo.monto">
+    </mat-form-field>
+    <button matButton="filled" class="btn-gradiente" (click)="guardar()">Agregar</button>
+  </mat-card>
+</div>

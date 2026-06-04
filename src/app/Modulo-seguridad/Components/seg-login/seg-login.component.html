@@ -1,0 +1,24 @@
+<div class="fondo">
+  <mat-card class="caja">
+    <a routerLink="/" class="marca"><mat-icon>music_note</mat-icon> <span class="texto-gradiente">Agua Cristalina</span></a>
+    <h2>Acceso administrativo</h2>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Correo</mat-label>
+      <input matInput type="email" [(ngModel)]="modelo.email" (keyup.enter)="entrar()">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contraseña</mat-label>
+      <input matInput type="password" [(ngModel)]="modelo.password" (keyup.enter)="entrar()">
+    </mat-form-field>
+
+    @if (esMock) {
+      <p class="hint">Modo demo: cualquier correo y contraseña funcionan.</p>
+    }
+
+    <button matButton="filled" class="btn" [disabled]="cargando" (click)="entrar()">
+      {{ cargando ? 'Ingresando…' : 'Ingresar' }}
+    </button>
+  </mat-card>
+</div>

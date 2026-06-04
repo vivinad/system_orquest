@@ -1,0 +1,50 @@
+<h1>Cotizaciones</h1>
+
+<mat-button-toggle-group [(ngModel)]="filtro" (change)="cargar()" class="filtros">
+  <mat-button-toggle value="">Todas</mat-button-toggle>
+  <mat-button-toggle value="pendiente">Pendientes</mat-button-toggle>
+  <mat-button-toggle value="confirmada">Confirmadas</mat-button-toggle>
+  <mat-button-toggle value="pagada">Pagadas</mat-button-toggle>
+  <mat-button-toggle value="realizada">Realizadas</mat-button-toggle>
+</mat-button-toggle-group>
+
+<mat-card class="panel">
+  <table mat-table [dataSource]="lista" class="tabla">
+    <ng-container matColumnDef="folio">
+      <th mat-header-cell *matHeaderCellDef>#</th>
+      <td mat-cell *matCellDef="let c">{{ c.id }}</td>
+    </ng-container>
+    <ng-container matColumnDef="cliente">
+      <th mat-header-cell *matHeaderCellDef>Cliente</th>
+      <td mat-cell *matCellDef="let c">{{ c.nombreCliente }}<br><small>{{ c.telefonoCliente }}</small></td>
+    </ng-container>
+    <ng-container matColumnDef="evento">
+      <th mat-header-cell *matHeaderCellDef>Evento</th>
+      <td mat-cell *matCellDef="let c">{{ c.fechaEvento }} · {{ c.diaSemana }}<br><small>{{ c.paquete?.nombre }} · {{ c.horasSolicitadas }}h</small></td>
+    </ng-container>
+    <ng-container matColumnDef="total">
+      <th mat-header-cell *matHeaderCellDef>Total</th>
+      <td mat-cell *matCellDef="let c">
+        <strong>{{ pen(c.total) }}</strong>
+        @if (c.tieneATratar) {
+          <mat-icon class="warn" [matTooltip]="c.motivoATratar || 'A tratar'">report_problem</mat-icon>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="estado">
+      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <td mat-cell *matCellDef="let c">
+        <mat-form-field appearance="outline" class="sel-estado" subscriptSizing="dynamic">
+          <mat-select [(ngModel)]="c.estado" (selectionChange)="cambiar(c, $event.value)">
+            @for (e of estados; track e) { <mat-option [value]="e">{{ e }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+  </table>
+
+  @if (lista.length === 0) { <p class="vacio">No hay cotizaciones en esta categoría.</p> }
+</mat-card>

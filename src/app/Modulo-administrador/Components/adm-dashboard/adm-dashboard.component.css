@@ -1,0 +1,15 @@
+h1 { margin-top: 0; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.kpi {
+  display: flex; align-items: center; gap: 14px; padding: 18px;
+  background: var(--ac-surface); border: 1px solid var(--ac-border);
+}
+.ic { font-size: 36px; height: 36px; width: 36px; }
+.ic.ing { color: var(--ac-verde); }
+.ic.gas { color: var(--ac-naranja); }
+.ic.bal { color: var(--ac-magenta); }
+.ic.pend { color: var(--ac-amarillo); }
+.label { display: block; color: var(--ac-text-muted); font-size: .85rem; }
+.valor { font-size: 1.5rem; font-weight: 700; }
+.accesos { margin-top: 24px; padding: 18px; background: var(--ac-surface); border: 1px solid var(--ac-border); }
+.botones { display: flex; gap: 12px; flex-wrap: wrap; }

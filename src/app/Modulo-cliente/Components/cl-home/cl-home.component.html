@@ -1,0 +1,100 @@
+<!-- ===== Navbar ===== -->
+<header class="nav">
+  <a href="#inicio" class="brand">
+    <mat-icon>music_note</mat-icon>
+    <span class="texto-gradiente">Agua Cristalina</span>
+  </a>
+  <nav class="links">
+    <a href="#nosotros">Nosotros</a>
+    <a href="#paquetes">Paquetes</a>
+    <a routerLink="/cotizar">Cotizar</a>
+    <a routerLink="/login" class="admin">Admin</a>
+  </nav>
+  <button matButton="filled" class="btn-gradiente nav-cta" routerLink="/cotizar">Cotiza tu evento</button>
+</header>
+
+<!-- ===== Hero ===== -->
+<section id="inicio" class="hero">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+
+  <div class="hero-content">
+    <span class="badge">🌴 Cumbia tropical · Máncora — Piura</span>
+    <h1>Agrupación <span class="texto-gradiente">Agua Cristalina</span></h1>
+    <p class="lema">El sabor que tu fiesta necesita. Bodas, aniversarios, fiestas patronales y todo evento que quieras hacer inolvidable.</p>
+    <div class="hero-cta">
+      <button matButton="filled" class="btn-gradiente grande" routerLink="/cotizar">
+        <mat-icon>request_quote</mat-icon> Cotiza tu evento
+      </button>
+      <a [href]="waLink" target="_blank" rel="noopener" matButton="outlined" class="grande wa">
+        <mat-icon>chat</mat-icon> Escríbenos por WhatsApp
+      </a>
+    </div>
+  </div>
+  <a href="#nosotros" class="scroll-down"><mat-icon>expand_more</mat-icon></a>
+</section>
+
+<!-- ===== Nosotros ===== -->
+<section id="nosotros" class="nosotros">
+  <div class="contenedor">
+    <h2 class="seccion-titulo">Nosotros</h2>
+    <p class="seccion-sub">
+      Somos <strong>Agua Cristalina</strong>, una agrupación de cumbia y sabor del norte liderada por
+      <strong>Wendy Querevalú Sabalú</strong>. Llevamos energía, ritmo y profesionalismo a cada escenario,
+      con equipo de sonido propio y formaciones desde 3 hasta 11 músicos.
+    </p>
+    <div class="features">
+      <div class="feature"><mat-icon>verified</mat-icon><h3>Sonido propio</h3><p>Incluido en todos los paquetes.</p></div>
+      <div class="feature"><mat-icon>groups</mat-icon><h3>De 3 a 11 músicos</h3><p>La formación que tu evento necesite.</p></div>
+      <div class="feature"><mat-icon>local_shipping</mat-icon><h3>Movilidad en Lima</h3><p>Sin costo en Lima Metropolitana y Callao.</p></div>
+      <div class="feature"><mat-icon>celebration</mat-icon><h3>Para toda fiesta</h3><p>Bodas, quinceañeros, patronales y más.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Paquetes ===== -->
+<section id="paquetes" class="paquetes">
+  <div class="contenedor">
+    <h2 class="seccion-titulo">Nuestros paquetes</h2>
+    <p class="seccion-sub">Precios referenciales por show de 5 horas. Arma el tuyo en el cotizador.</p>
+
+    <div class="cards">
+      @for (p of paquetes; track p.id) {
+        <article class="card">
+          <div class="card-top">
+            <span class="integrantes">{{ p.numIntegrantes }} integrantes</span>
+            <h3>{{ p.nombre }}</h3>
+          </div>
+          <p class="desc">{{ p.descripcion }}</p>
+          <div class="precio"><small>DESDE</small> {{ pen(p.precioBase) }}</div>
+          <button matButton="filled" class="btn-gradiente" routerLink="/cotizar">Cotizar este</button>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ===== Contacto ===== -->
+<section id="contacto" class="contacto">
+  <div class="contenedor">
+    <h2 class="seccion-titulo">¿Listos para tu evento?</h2>
+    <p class="seccion-sub">Escríbenos y reserva tu fecha con Agua Cristalina.</p>
+    <div class="redes">
+      <a [href]="waLink" target="_blank" rel="noopener" class="red wa"><mat-icon>chat</mat-icon> WhatsApp 993 771 153</a>
+      <a href="https://facebook.com" target="_blank" rel="noopener" class="red fb"><mat-icon>thumb_up</mat-icon> Wendy y su Agua Cristalina</a>
+      <a href="https://tiktok.com" target="_blank" rel="noopener" class="red tk"><mat-icon>music_video</mat-icon> Wendy y su Agua Cristalina</a>
+    </div>
+  </div>
+</section>
+
+<footer class="pie">
+  <span class="texto-gradiente brand-pie">Agua Cristalina</span>
+  <p>Representante: Wendy Querevalú Sabalú · Máncora — Piura</p>
+  <a routerLink="/login" class="admin-link">Acceso administrativo</a>
+</footer>
+
+<!-- ===== WhatsApp flotante ===== -->
+<a [href]="waLink" target="_blank" rel="noopener" class="wa-float" title="Escríbenos por WhatsApp">
+  <mat-icon>chat</mat-icon>
+</a>

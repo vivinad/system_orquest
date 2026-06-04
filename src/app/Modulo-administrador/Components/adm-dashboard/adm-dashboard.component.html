@@ -1,0 +1,29 @@
+<h1>Resumen general</h1>
+
+<div class="kpis">
+  <mat-card class="kpi">
+    <mat-icon class="ic ing">trending_up</mat-icon>
+    <div><span class="label">Ingresos</span><span class="valor">{{ pen(resumen?.ingresos) }}</span></div>
+  </mat-card>
+  <mat-card class="kpi">
+    <mat-icon class="ic gas">trending_down</mat-icon>
+    <div><span class="label">Gastos</span><span class="valor">{{ pen(resumen?.gastos) }}</span></div>
+  </mat-card>
+  <mat-card class="kpi">
+    <mat-icon class="ic bal">account_balance_wallet</mat-icon>
+    <div><span class="label">Balance</span><span class="valor">{{ pen(resumen?.balance) }}</span></div>
+  </mat-card>
+  <mat-card class="kpi">
+    <mat-icon class="ic pend">pending_actions</mat-icon>
+    <div><span class="label">Cotizaciones pendientes</span><span class="valor">{{ pendientes }}</span></div>
+  </mat-card>
+</div>
+
+<mat-card class="accesos">
+  <h3>Accesos rápidos</h3>
+  <div class="botones">
+    <button matButton="filled" class="btn-gradiente" routerLink="/main/cotizaciones"><mat-icon>request_quote</mat-icon> Ver cotizaciones</button>
+    <button matButton="outlined" routerLink="/main/catalogo"><mat-icon>library_music</mat-icon> Configurar catálogo</button>
+    <button matButton="outlined" routerLink="/main/finanzas"><mat-icon>payments</mat-icon> Registrar movimiento</button>
+  </div>
+</mat-card>
