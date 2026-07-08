@@ -1,13 +1,11 @@
 <!-- ===== Navbar ===== -->
 <header class="nav">
   <a href="#inicio" class="brand">
-    <mat-icon>music_note</mat-icon>
-    <span class="texto-gradiente">Agua Cristalina</span>
+    <img src="logo.png" alt="Agua Cristalina" class="logo-img">
   </a>
   <nav class="links">
+    <a href="#eventos">Eventos</a>
     <a href="#nosotros">Nosotros</a>
-    <a href="#paquetes">Paquetes</a>
-    <a routerLink="/cotizar">Cotizar</a>
     <a routerLink="/login" class="admin">Admin</a>
   </nav>
   <button matButton="filled" class="btn-gradiente nav-cta" routerLink="/cotizar">Cotiza tu evento</button>
@@ -16,24 +14,102 @@
 <!-- ===== Hero ===== -->
 <section id="inicio" class="hero">
   <div class="glow glow-1"></div>
-  <div class="glow glow-2"></div>
   <div class="glow glow-3"></div>
 
-  <div class="hero-content">
-    <span class="badge">🌴 Cumbia tropical · Máncora — Piura</span>
-    <h1>Agrupación <span class="texto-gradiente">Agua Cristalina</span></h1>
-    <p class="lema">El sabor que tu fiesta necesita. Bodas, aniversarios, fiestas patronales y todo evento que quieras hacer inolvidable.</p>
-    <div class="hero-cta">
-      <button matButton="filled" class="btn-gradiente grande" routerLink="/cotizar">
-        <mat-icon>request_quote</mat-icon> Cotiza tu evento
-      </button>
-      <a [href]="waLink" target="_blank" rel="noopener" matButton="outlined" class="grande wa">
-        <mat-icon>chat</mat-icon> Escríbenos por WhatsApp
-      </a>
+  <div class="hero-grid">
+    <div class="hero-content">
+      <span class="badge">🌴 Cumbia tropical · Máncora — Piura</span>
+      <h1 class="hero-titulo">
+        <span class="hero-nombre">Wendy</span>
+        <span class="hero-conector">y su</span>
+        <span class="texto-gradiente hero-agua">Agua Cristalina</span>
+      </h1>
+      <p class="lema">
+        Somos una agrupación musical con un repertorio variado, capaz de adaptarnos a 
+        cualquier ambiente y ocasión. Fusionamos distintos géneros para llevar energía, 
+        sabor y emoción a cada presentación, ya sea en fiestas privadas, eventos sociales 
+        o celebraciones especiales. Con años de experiencia sobre el escenario, nuestro 
+        compromiso es hacer de cada evento un momento inolvidable, combinando talento, 
+        pasión y profesionalismo en cada nota.
+        ¡Déjanos ser parte de tu celebración!🎶💛
+      </p>
+      <div class="hero-cta">
+        <button matButton="filled" class="btn-gradiente extra-grande" routerLink="/cotizar">
+          <mat-icon>request_quote</mat-icon> Cotiza tu evento
+        </button>
+      </div>
+    </div>
+
+    <!-- Zona de fotos: carrusel automático -->
+    <div class="fotos-zona">
+      <div class="slider">
+        <div class="slider-track" [style.transform]="'translateX(-' + fotoActual * 100 + '%)'">
+          @for (f of fotos; track f) {
+            <img [src]="f" alt="Agrupación Agua Cristalina" class="foto-slide">
+          }
+        </div>
+        <button class="flecha izq" (click)="fotoManual(-1)" aria-label="Foto anterior">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="flecha der" (click)="fotoManual(1)" aria-label="Foto siguiente">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      <div class="dots">
+        @for (f of fotos; track f; let i = $index) {
+          <button class="dot" [class.activo]="i === fotoActual" (click)="irAFoto(i)"
+                  [attr.aria-label]="'Ver foto ' + (i + 1)"></button>
+        }
+      </div>
     </div>
   </div>
-  <a href="#nosotros" class="scroll-down"><mat-icon>expand_more</mat-icon></a>
+  <a href="#eventos" class="scroll-down"><mat-icon>expand_more</mat-icon></a>
 </section>
+
+<!-- ===== Próximos eventos ===== -->
+@if (eventos.length > 0) {
+  <section id="eventos" class="eventos">
+    <div class="contenedor">
+      <h2 class="seccion-titulo">Próximos <span class="texto-gradiente">eventos</span></h2>
+      <p class="seccion-sub">¡Ven a gozar con Agua Cristalina! Te esperamos en nuestros próximos shows.</p>
+
+      @for (g of gruposEventos; track g.direccion) {
+        <div class="evento">
+          <div class="evento-slider">
+            <div class="slider-track"
+                 [style.transform]="'translateX(-' + indiceEvento(g) * 100 + '%)'">
+              @for (e of g.eventos; track e.id) {
+                <figure class="evento-slide">
+                  <img [src]="e.imagenUrl" class="foto-slide" [alt]="e.titulo">
+                  <figcaption class="evento-caption">
+                    <mat-icon>event</mat-icon>
+                    <span><strong>{{ e.titulo }}</strong> — {{ e.fechaTexto }}</span>
+                  </figcaption>
+                </figure>
+              }
+            </div>
+            @if (g.eventos.length > 1) {
+              <button class="flecha izq" (click)="eventoManual(-1)" aria-label="Flyer anterior">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button class="flecha der" (click)="eventoManual(1)" aria-label="Flyer siguiente">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            }
+          </div>
+          <div class="evento-mapa">
+            <iframe [src]="mapaDe(g.direccion)" loading="lazy" allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade" title="Ubicación del evento"></iframe>
+            <p class="evento-dir">
+              <mat-icon>location_on</mat-icon>
+              {{ g.lugar }} · {{ g.direccion }}
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}
 
 <!-- ===== Nosotros ===== -->
 <section id="nosotros" class="nosotros">
@@ -44,46 +120,55 @@
       <strong>Wendy Querevalú Sabalú</strong>. Llevamos energía, ritmo y profesionalismo a cada escenario,
       con equipo de sonido propio y formaciones desde 3 hasta 11 músicos.
     </p>
+
+    <!-- Redes sociales -->
+    <div class="redes-cards">
+      <a class="red-card tiktok" href="https://vt.tiktok.com/ZSCKdEAxE/" target="_blank" rel="noopener">
+        <div class="red-foto"><img src="tiktok.png" alt="Agua Cristalina en TikTok"></div>
+        <span class="red-nombre">TikTok</span>
+        <span class="red-user">Wendy y su Agua Cristalina</span>
+        <span class="red-btn">Síguenos</span>
+      </a>
+      <a class="red-card facebook" href="https://www.facebook.com/profile.php?id=100063606396805" target="_blank" rel="noopener">
+        <div class="red-foto"><img src="facebook.png" alt="Agua Cristalina en Facebook"></div>
+        <span class="red-nombre">Facebook</span>
+        <span class="red-user">Wendy y su Agua Cristalina</span>
+        <span class="red-btn">Síguenos</span>
+      </a>
+      <a class="red-card instagram" href="https://www.instagram.com/wendy.agua.cristalina?igsh=MjN2M25qa2NiaXdp" target="_blank" rel="noopener">
+        <div class="red-foto"><img src="logo.png" alt="Agua Cristalina en Instagram"></div>
+        <span class="red-nombre">Instagram</span>
+        <span class="red-user">&#64;wendy.agua.cristalina</span>
+        <span class="red-btn">Síguenos</span>
+      </a>
+      <a class="red-card whatsapp" [href]="waLink" target="_blank" rel="noopener">
+        <div class="red-foto"><img src="whatsApp.png" alt="Agua Cristalina en WhatsApp"></div>
+        <span class="red-nombre">WhatsApp</span>
+        <span class="red-user">993 771 153</span>
+        <span class="red-btn">Escríbenos</span>
+      </a>
+    </div>
+
     <div class="features">
       <div class="feature"><mat-icon>verified</mat-icon><h3>Sonido propio</h3><p>Incluido en todos los paquetes.</p></div>
-      <div class="feature"><mat-icon>groups</mat-icon><h3>De 3 a 11 músicos</h3><p>La formación que tu evento necesite.</p></div>
+      <div class="feature"><mat-icon>groups</mat-icon><h3>De 3 a más músicos</h3><p>La formación que tu evento necesite.</p></div>
       <div class="feature"><mat-icon>local_shipping</mat-icon><h3>Movilidad en Lima</h3><p>Sin costo en Lima Metropolitana y Callao.</p></div>
       <div class="feature"><mat-icon>celebration</mat-icon><h3>Para toda fiesta</h3><p>Bodas, quinceañeros, patronales y más.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===== Paquetes ===== -->
-<section id="paquetes" class="paquetes">
+<!-- ===== Arma tu orquesta (CTA al cotizador) ===== -->
+<section id="arma" class="arma">
   <div class="contenedor">
-    <h2 class="seccion-titulo">Nuestros paquetes</h2>
-    <p class="seccion-sub">Precios referenciales por show de 5 horas. Arma el tuyo en el cotizador.</p>
-
-    <div class="cards">
-      @for (p of paquetes; track p.id) {
-        <article class="card">
-          <div class="card-top">
-            <span class="integrantes">{{ p.numIntegrantes }} integrantes</span>
-            <h3>{{ p.nombre }}</h3>
-          </div>
-          <p class="desc">{{ p.descripcion }}</p>
-          <div class="precio"><small>DESDE</small> {{ pen(p.precioBase) }}</div>
-          <button matButton="filled" class="btn-gradiente" routerLink="/cotizar">Cotizar este</button>
-        </article>
-      }
-    </div>
-  </div>
-</section>
-
-<!-- ===== Contacto ===== -->
-<section id="contacto" class="contacto">
-  <div class="contenedor">
-    <h2 class="seccion-titulo">¿Listos para tu evento?</h2>
-    <p class="seccion-sub">Escríbenos y reserva tu fecha con Agua Cristalina.</p>
-    <div class="redes">
-      <a [href]="waLink" target="_blank" rel="noopener" class="red wa"><mat-icon>chat</mat-icon> WhatsApp 993 771 153</a>
-      <a href="https://facebook.com" target="_blank" rel="noopener" class="red fb"><mat-icon>thumb_up</mat-icon> Wendy y su Agua Cristalina</a>
-      <a href="https://tiktok.com" target="_blank" rel="noopener" class="red tk"><mat-icon>music_video</mat-icon> Wendy y su Agua Cristalina</a>
+    <h2 class="seccion-titulo">Arma tu orquesta a tu medida</h2>
+    <p class="seccion-sub">
+      Elige cuántos integrantes quieres, agrega músicos y servicios extra, y obtén tu precio al instante en nuestro cotizador.
+    </p>
+    <div class="arma-cta">
+      <button matButton="filled" class="btn-gradiente grande" routerLink="/cotizar">
+        <mat-icon>tune</mat-icon> Empezar a cotizar
+      </button>
     </div>
   </div>
 </section>

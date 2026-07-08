@@ -1,0 +1,250 @@
+TIPOS DE DATOS
+
+int significa número entero
+
+string significa texto 
+
+double guarda números decimales con coma
+
+bool verdadero o falso (true o false)
+
+MOSTRAR INFORMACIÓN EN PANTALLA 
+
+Console.WriteLine();
+
+Console.WriteLine("Hola");
+
+Console.WriteLine(nombre);
+
+Console.WriteLine("Hola " + nombre);
++ sirve para unir texto
+nombre es una variable tipo texto
+
+RECIBIR DATOS DEL USUARIO
+
+Console.ReadLine();
+
+ejemplo:
+
+Console.WriteLine("¿Cómo te llamas?");
+-> El programa pregunta algo
+
+string nombre = Console.ReadLine();
+-> El usuario escribe algo y el programa lo guarda en la variable nombre
+Console.WriteLine("Hola " + nombre);
+-> El programa responde usando lo que escribió el usuario
+
+NOTA
+Console.ReadLine() siempre recibe texto (string). Incluso si el
+usuario escribe un número.
+
+CONVERTIR TEXTO A NÚMERO
+
+Convert.ToInt32()
+Convierte un texto a número
+
+ejemplo:
+
+Console.WriteLine("Ingresa tu edad:");
+
+int edad = Convert.ToInt32(Console.ReadLine());
+
+Console.WriteLine("Tu edad es " + edad);
+
+OPERADORES MATEMATICOS 
+
+suma + 
+
+int resultado = 5 + 3
+
+resta - 
+
+int resultado = 10 - 4
+
+multiplicación *
+
+int resultado = 5 * 2
+
+división / 
+
+int resultado = 20 / 5
+
+ejemplo:
+
+Console.WriteLine("Ingresa un número:");
+int num1 = Convert.ToInt32(Console.ReadLine());
+
+Console.WriteLine("Ingresa otro número:");
+int num2 = Convert.ToInt32(Console.ReadLine());
+
+int resultado = num1 + num2;
+
+Console.WriteLine("La suma es " + resultado);
+
+OPERADORES DE COMPARACIÓN
+
+>= mayor o igual que
+<= menor o igual que
+== igual que
+!= diferente de
+> mayor que
+< menor que
+
+CONDICION IF - ELSE
+
+Las condiciones permiten que el programa tome decisiones
+
+sintaxis 
+
+if (condicion) {
+
+//codigo
+
+}
+
+ejemplo:
+
+int edad = 20;
+
+if (edad >= 18)
+{
+    Console.WriteLine("Eres mayor de edad");
+}
+
+ejemplo con else:
+
+int edad = 15;
+
+if (edad >= 18)
+{
+    Console.WriteLine("Eres mayor de edad");
+}
+else
+{
+    Console.WriteLine("Eres menor de edad");
+}
+
+CICLOS WHILE 
+
+Los ciclos sirven para repetir código automáticamente
+
+sintaxis
+
+while (condición) {
+
+//codigo que se repite
+
+}
+
+ejemplo: 
+
+int numero = 1;
+
+while (numero <= 5)
+{
+    Console.WriteLine(numero);
+
+    numero++;
+}
+
+mientras que la variable numero sea menor o igual a
+5 el bucle se repetirá.
+
+numero++ significa numero = numero + 1
+
+numero++ es una varible tipo contador ya que 
+va sumando en uno en uno por cada repetición del 
+ciclo
+
+CICLOS FOR
+
+while se usa mucho, pero cuando sabemos exactamente cuántas veces repetir algo, normalmente usamos for.
+
+sintaxis 
+
+for (inicio; condicion; aumento) {
+
+
+// código
+
+}
+
+ejemplo: 
+
+for (int i = 1; i <= 5; i++)
+{
+    Console.WriteLine(i);
+}
+
+Diferencia entre while y for
+while
+
+Se usa cuando:
+
+No sabes exactamente cuántas veces se repetirá.
+
+Ejemplo:
+
+Mientras el usuario no escriba “salir”.
+for
+
+Se usa cuando:
+
+Sí sabes cuántas veces repetir.
+
+Ejemplo:
+
+Repetir 10 veces.
+
+METODOS (FUNCIONES)
+
+Imagina una licuadora.
+
+La licuadora tiene una función específica:
+
+hacer jugo
+
+Cada vez que quieras jugo, no construyes otra licuadora.
+Solo la usas nuevamente.
+
+Los métodos funcionan igual:
+
+escribes el código una vez
+lo reutilizas cuando quieras
+
+ejemplo:
+
+static void Saludar()
+{
+    Console.WriteLine("Hola");
+}
+
+uso:
+
+Saludar();
+
+MÉTODOS CON PARÁMETROS
+Antes nuestros métodos siempre hacían lo mismo.
+Pero a veces queremos enviarles información.
+
+ejemplo:
+
+static void Saludar(string nombre)
+{
+    Console.WriteLine("Hola " + nombre);
+}
+
+Saludar("Josue");
+Saludar("Carlos");
+
+
+METODOS CON RETURN
+
+eturn significa:
+
+“Devuelve este resultado”.
+
+static int Sumar(int a, int b)
+{
+    return a + b;
+}

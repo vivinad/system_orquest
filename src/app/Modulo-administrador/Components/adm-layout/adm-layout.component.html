@@ -1,4 +1,5 @@
 <mat-toolbar class="topbar">
+  <button matIconButton routerLink="/" title="Volver a la página principal"><mat-icon>arrow_back</mat-icon></button>
   <span class="marca texto-gradiente">Agua Cristalina</span>
   <span class="sep">· Administración</span>
   <span class="spacer"></span>
@@ -12,6 +13,9 @@
     <a routerLink="/main/cotizaciones" routerLinkActive="activo"><mat-icon>request_quote</mat-icon> Cotizaciones</a>
     <a routerLink="/main/finanzas" routerLinkActive="activo"><mat-icon>payments</mat-icon> Finanzas</a>
     <a routerLink="/main/catalogo" routerLinkActive="activo"><mat-icon>library_music</mat-icon> Catálogo</a>
+    <a routerLink="/main/eventos" routerLinkActive="activo"><mat-icon>event</mat-icon> Eventos</a>
+    <span class="menu-spacer"></span>
+    <a routerLink="/" class="volver-web"><mat-icon>public</mat-icon> Ver página web</a>
   </nav>
   <main class="contenido"><router-outlet /></main>
 </div>

@@ -1,4 +1,4 @@
-import { Paquete, MusicoAdicional, Distrito, ServicioExtra } from '../Models/mae-catalogo.model';
+import { Paquete, MusicoAdicional, Distrito, ServicioExtra, Evento } from '../Models/mae-catalogo.model';
 
 // Datos de prueba en memoria — reflejan la proforma real.
 // Permiten avanzar el frontend SIN base de datos (environment.useMock = true).
@@ -38,6 +38,29 @@ export const MOCK_DISTRITOS: Distrito[] = [
   { id: 14, nombre: 'Punta Hermosa', zona: 'zona_150', costoMovilidad: 150, esATratar: false },
   { id: 15, nombre: 'San Bartolo', zona: 'zona_150', costoMovilidad: 150, esATratar: false },
   { id: 16, nombre: 'Fuera de Lima / Provincia', zona: 'fuera_lima', costoMovilidad: 0, esATratar: true },
+];
+
+export const MOCK_EVENTOS: Evento[] = [
+  {
+    id: 1,
+    titulo: 'Fiestas Patrias con Segundo Meléndez',
+    fechaTexto: '11 y 12 de julio · desde la 1:00 PM',
+    fecha: '2026-07-12',
+    lugar: 'Picantería "Huarique Piurano" — La Encantada',
+    direccion: 'Av. José Saco Rojas, Carabayllo, Lima',
+    imagenUrl: 'evento1.png',
+    activo: true,
+  },
+  {
+    id: 2,
+    titulo: 'Domingos de Peña',
+    fechaTexto: 'Todos los domingos · de 1:00 PM a 6:00 PM',
+    fecha: '2026-12-31',
+    lugar: 'Picantería "Huarique Piurano" — La Encantada',
+    direccion: 'Av. José Saco Rojas, Carabayllo, Lima',
+    imagenUrl: 'evento2.png',
+    activo: true,
+  },
 ];
 
 export const MOCK_SERVICIOS: ServicioExtra[] = [

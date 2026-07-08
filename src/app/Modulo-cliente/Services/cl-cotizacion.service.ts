@@ -11,12 +11,8 @@ import {
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-// Cotizaciones de prueba (vista admin) cuando useMock = true
-const MOCK_COTIZACIONES: Cotizacion[] = [
-  { id: 1, nombreCliente: 'María Gómez', telefonoCliente: '987654321', emailCliente: 'maria@correo.com', paqueteId: 1, distritoId: 1, fechaEvento: '2026-07-12', diaSemana: 'Domingo', horasSolicitadas: 5, costoPaquete: 1250, costoMusicosExtra: 0, costoMovilidad: 0, subtotal: 1250, total: 1250, estado: 'pendiente', tieneATratar: false, fechaCreacion: '2026-06-01T10:00:00', paquete: { id: 1, nombre: 'Agrupación 3 integrantes' }, distrito: { id: 1, nombre: 'Miraflores' } },
-  { id: 2, nombreCliente: 'José Ramírez', telefonoCliente: '912345678', paqueteId: 2, distritoId: 13, fechaEvento: '2026-08-02', diaSemana: 'Domingo', horasSolicitadas: 5, costoPaquete: 1500, costoMusicosExtra: 0, costoMovilidad: 150, subtotal: 1650, total: 1650, estado: 'confirmada', tieneATratar: false, fechaCreacion: '2026-06-02T14:30:00', paquete: { id: 2, nombre: 'Agrupación 4 integrantes' }, distrito: { id: 13, nombre: 'Lurín' } },
-  { id: 3, nombreCliente: 'Lucía Torres', telefonoCliente: '900112233', paqueteId: 4, distritoId: 16, fechaEvento: '2026-09-20', diaSemana: 'Domingo', horasSolicitadas: 6, costoPaquete: 3840, costoMusicosExtra: 300, costoMovilidad: 0, subtotal: 4140, total: 4140, estado: 'pagada', tieneATratar: true, motivoATratar: 'Fuera de Lima Metropolitana; movilidad a coordinar.', fechaCreacion: '2026-06-03T09:15:00', paquete: { id: 4, nombre: 'Agrupación 8 integrantes' }, distrito: { id: 16, nombre: 'Fuera de Lima / Provincia' } },
-];
+// Cotizaciones en memoria (vista admin) cuando useMock = true
+const MOCK_COTIZACIONES: Cotizacion[] = [];
 
 @Injectable({ providedIn: 'root' })
 export class ClCotizacionService {

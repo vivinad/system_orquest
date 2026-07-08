@@ -43,6 +43,29 @@ namespace backend_orquesta.Controllers
             });
         }
 
+        // POST: api/auth/seed — crea el primer admin (solo si no existe ninguno)
+        [HttpPost("seed")]
+        public async Task<IActionResult> Seed([FromBody] SeedRequest request)
+        {
+            var yaExiste = await _context.UsuariosAdmin.AnyAsync();
+            if (yaExiste) return BadRequest(new { mensaje = "Ya existe un administrador." });
+
+            var usuario = new Models.UsuarioAdmin
+            {
+                Nombre = request.Nombre,
+                Email = request.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Rol = "admin",
+                Activo = true,
+                FechaCreacion = DateTime.Now,
+            };
+
+            _context.UsuariosAdmin.Add(usuario);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensaje = "Administrador creado.", usuario.Id, usuario.Email });
+        }
+
         private string GenerarToken(int id, string email, string rol)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
@@ -69,6 +92,13 @@ namespace backend_orquesta.Controllers
 
     public class LoginRequest
     {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class SeedRequest
+    {
+        public string Nombre { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }

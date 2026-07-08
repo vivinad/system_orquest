@@ -4,12 +4,7 @@ import { Observable, of, delay } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Finanza, ResumenFinanzas } from '../Models/adm-finanza.model';
 
-const MOCK_FINANZAS: Finanza[] = [
-  { id: 1, adminId: 1, cotizacionId: 2, tipo: 'ingreso', monto: 1650, descripcion: 'Adelanto evento José Ramírez', categoria: 'Eventos', fecha: '2026-06-02' },
-  { id: 2, adminId: 1, cotizacionId: 3, tipo: 'ingreso', monto: 4140, descripcion: 'Pago total Lucía Torres', categoria: 'Eventos', fecha: '2026-06-03' },
-  { id: 3, adminId: 1, tipo: 'gasto', monto: 400, descripcion: 'Transporte de equipo de sonido', categoria: 'Logística', fecha: '2026-06-02' },
-  { id: 4, adminId: 1, tipo: 'gasto', monto: 250, descripcion: 'Pago músico de viento', categoria: 'Músicos', fecha: '2026-06-03' },
-];
+const MOCK_FINANZAS: Finanza[] = [];
 
 @Injectable({ providedIn: 'root' })
 export class AdmFinanzaService {

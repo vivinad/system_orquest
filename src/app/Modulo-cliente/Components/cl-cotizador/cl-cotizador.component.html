@@ -1,7 +1,13 @@
+<!-- Botón flotante para regresar -->
+<button class="volver-flotante" (click)="volver()" title="Regresar">
+  <mat-icon>arrow_back</mat-icon>
+</button>
+
 <header class="barra">
-  <a routerLink="/" class="marca"><mat-icon>music_note</mat-icon> Orquesta</a>
+  <a routerLink="/" class="marca">
+    <img src="logo.png" alt="Agua Cristalina" class="logo-img">
+  </a>
   <span class="spacer"></span>
-  <a routerLink="/login" matButton>Soy administrador</a>
 </header>
 
 @if (enviado) {
@@ -14,43 +20,60 @@
 } @else {
   <div class="layout">
     <div class="pasos">
-      <mat-stepper orientation="vertical" #stepper>
+      <mat-stepper orientation="vertical" [linear]="true" #stepper>
 
-        <!-- Paso 1: Evento -->
-        <mat-step label="Tu evento">
-          <h3>Elige tu agrupación</h3>
+        <!-- Paso 1: ¿Cuántos integrantes? -->
+        <mat-step label="¿Cuántos integrantes deseas?" [completed]="!!paqueteId">
+          <h3>¿Cuántos integrantes deseas?</h3>
+          <p class="sub">Elige una formación. Te mostramos qué integrantes incluye cada una.</p>
           <mat-radio-group class="paquetes" [(ngModel)]="paqueteId" (ngModelChange)="recalcular()">
             @for (p of paquetes; track p.id) {
               <mat-card class="paquete" [class.sel]="paqueteId === p.id"
                         (click)="paqueteId = p.id; recalcular()">
-                <mat-radio-button [value]="p.id"></mat-radio-button>
-                <div class="info">
-                  <div class="fila">
-                    <strong>{{ p.nombre }}</strong>
-                    <span class="precio">{{ pen(p.precioBase) }}<small>/{{ p.horasBase }}h</small></span>
+                <div class="paquete-top">
+                  <div class="num-int">
+                    <span class="num">{{ p.numIntegrantes }}</span>
+                    <small>integrantes</small>
                   </div>
-                  <p class="desc">{{ p.descripcion }}</p>
+                  <mat-radio-button [value]="p.id"></mat-radio-button>
+                </div>
+                <div class="info">
+                  <strong>{{ p.nombre }}</strong>
+                  <p class="desc"><mat-icon>groups</mat-icon> Incluye: {{ p.descripcion }}</p>
                 </div>
               </mat-card>
             }
           </mat-radio-group>
 
+          @if (!paqueteId) {
+            <p class="nota">
+              <mat-icon>lock</mat-icon>
+              Elige una formación para habilitar los siguientes pasos.
+            </p>
+          }
+
+          <div class="acciones-paso">
+            <button matButton="filled" matStepperNext [disabled]="!paqueteId">Siguiente</button>
+          </div>
+        </mat-step>
+
+        <!-- Paso 2: Tu evento -->
+        <mat-step label="Tu evento" [completed]="datosEventoOk">
+          <h3>Cuéntanos de tu evento</h3>
           <div class="campos">
             <mat-form-field appearance="outline">
               <mat-label>Distrito del evento</mat-label>
-              <mat-select [(ngModel)]="distritoId" (ngModelChange)="recalcular()">
+              <mat-icon matIconPrefix>location_on</mat-icon>
+              <mat-select [(ngModel)]="distritoId" (ngModelChange)="recalcular()" panelClass="panel-distritos">
                 @for (d of distritos; track d.id) {
-                  <mat-option [value]="d.id">
-                    {{ d.nombre }}
-                    @if (d.costoMovilidad > 0) { <small>(+{{ pen(d.costoMovilidad) }} movilidad)</small> }
-                    @if (d.esATratar) { <small>(movilidad a tratar)</small> }
-                  </mat-option>
+                  <mat-option [value]="d.id">{{ d.nombre }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Fecha del evento</mat-label>
+              <mat-icon matIconPrefix>event</mat-icon>
               <input matInput [matDatepicker]="picker" [min]="hoy"
                      [(ngModel)]="fechaEvento" (dateChange)="recalcular()">
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
@@ -59,6 +82,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Horas de show</mat-label>
+              <mat-icon matIconPrefix>schedule</mat-icon>
               <input matInput type="number" [min]="minHoras" [(ngModel)]="horas"
                      (ngModelChange)="recalcular()">
               <span matTextSuffix>h</span>
@@ -75,12 +99,13 @@
           }
 
           <div class="acciones-paso">
+            <button matButton matStepperPrevious>Atrás</button>
             <button matButton="filled" matStepperNext [disabled]="!datosEventoOk">Siguiente</button>
           </div>
         </mat-step>
 
-        <!-- Paso 2: Extras -->
-        <mat-step label="Músicos y servicios extra">
+        <!-- Paso 3: Extras -->
+        <mat-step label="Músicos y servicios extra" [completed]="true" optional>
           <h3>¿Agregar más músicos?</h3>
           <p class="sub">Cada músico se cobra una sola vez por el evento.</p>
           <div class="musicos">
@@ -124,7 +149,7 @@
           </div>
         </mat-step>
 
-        <!-- Paso 3: Contacto -->
+        <!-- Paso 4: Contacto -->
         <mat-step label="Tus datos">
           <h3>¿A quién contactamos?</h3>
           <div class="campos">
@@ -163,13 +188,48 @@
         <h3><mat-icon>receipt_long</mat-icon> Resumen</h3>
 
         @if (!datosEventoOk) {
-          <p class="vacio">Completa los datos de tu evento para ver el precio.</p>
+          @if (paqueteSel(); as p) {
+            <div class="linea"><span>{{ p.nombre }}</span><span>{{ pen(p.precioBase) }}</span></div>
+
+            @if (distritoSel(); as d) {
+              @if (d.costoMovilidad > 0 || d.esATratar) {
+                <div class="linea">
+                  <span>Movilidad · {{ d.nombre }}</span>
+                  <span>{{ d.esATratar ? 'A coordinar' : pen(d.costoMovilidad) }}</span>
+                </div>
+              }
+              @if (d.costoMovilidad > 0) {
+                <p class="nota-movilidad">
+                  <mat-icon>location_on</mat-icon>
+                  Por la distancia del distrito se cobra un adicional de movilidad.
+                </p>
+              }
+              @if (d.esATratar) {
+                <p class="nota-movilidad">
+                  <mat-icon>location_on</mat-icon>
+                  Por la distancia, el costo de movilidad se coordina directamente contigo.
+                </p>
+              }
+            }
+
+            <hr>
+            <div class="linea total"><span>Desde</span><span>{{ pen(p.precioBase + (distritoSel()?.costoMovilidad || 0)) }}</span></div>
+            <p class="vacio">Completa los datos de tu evento para ver el precio final.</p>
+          } @else {
+            <p class="vacio">Elige una formación y completa los datos de tu evento para ver el precio.</p>
+          }
         } @else if (resultado) {
           <div class="linea"><span>{{ paqueteSel()?.nombre }} ({{ horas }}h)</span><span>{{ pen(resultado.costoPaquete) }}</span></div>
           @if (resultado.costoMusicosExtra > 0) {
             <div class="linea"><span>Músicos adicionales</span><span>{{ pen(resultado.costoMusicosExtra) }}</span></div>
           }
-          <div class="linea"><span>Movilidad</span><span>{{ pen(resultado.costoMovilidad) }}</span></div>
+          @if (resultado.costoMovilidad > 0) {
+            <div class="linea"><span>Movilidad</span><span>{{ pen(resultado.costoMovilidad) }}</span></div>
+            <p class="nota-movilidad">
+              <mat-icon>location_on</mat-icon>
+              Por la distancia del distrito se cobra un adicional de movilidad.
+            </p>
+          }
           <hr>
           <div class="linea total"><span>Total</span><span>{{ pen(resultado.total) }}</span></div>
           <p class="dia">{{ resultado.diaSemana }}</p>
@@ -190,3 +250,8 @@
     </aside>
   </div>
 }
+
+<!-- ===== WhatsApp flotante ===== -->
+<a [href]="waLink" target="_blank" rel="noopener" class="wa-float" title="Escríbenos por WhatsApp">
+  <mat-icon>chat</mat-icon>
+</a>

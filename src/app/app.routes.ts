@@ -49,6 +49,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./Modulo-maestros/Components/mae-paquete-listar/mae-paquete-listar.component').then(m => m.MaePaqueteListarComponent),
       },
+      {
+        path: 'eventos',
+        loadComponent: () =>
+          import('./Modulo-maestros/Components/mae-evento-listar/mae-evento-listar.component').then(m => m.MaeEventoListarComponent),
+      },
     ],
   },
 

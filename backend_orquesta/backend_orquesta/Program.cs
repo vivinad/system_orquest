@@ -1,9 +1,22 @@
+using Microsoft.EntityFrameworkCore;
+using backend_orquesta.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Base de datos (SQL Server — cadena en appsettings.json)
+builder.Services.AddDbContext<OrquestaDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// CORS: permitir al frontend Angular consumir el API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularFrontend", policy =>
+        policy.WithOrigins("http://localhost:4200", "http://localhost:4300")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -17,6 +30,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AngularFrontend");
 
 app.UseAuthorization();
 

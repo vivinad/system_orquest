@@ -24,6 +24,17 @@ export interface Distrito {
   esATratar: boolean;
 }
 
+export interface Evento {
+  id: number;
+  titulo: string;
+  fechaTexto: string; // texto para el público, ej: '11 y 12 de julio · desde la 1:00 PM'
+  fecha: string; // ISO — último día del evento (para saber si sigue vigente)
+  lugar: string;
+  direccion: string; // dirección para el mapa de Google
+  imagenUrl: string; // nombre de archivo del flyer, ej: 'evento1.png'
+  activo: boolean;
+}
+
 export interface ServicioExtra {
   id: number;
   nombre: string;

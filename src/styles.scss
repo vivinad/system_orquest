@@ -51,12 +51,18 @@ body {
   color: transparent;
 }
 
-/* Botón con degradado de marca */
+/* Botón principal de marca: un solo color que resalta */
 .btn-gradiente {
-  background: var(--ac-gradient-diag) !important;
-  color: #0b0b12 !important;
+  background: var(--ac-magenta) !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
   border: none !important;
+  box-shadow: 0 6px 22px rgba(255, 46, 139, .45);
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-gradiente:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 46, 139, .6);
 }
 
 /* Scrollbar oscura */
@@ -66,3 +72,25 @@ body {
 
 /* SweetAlert2 en modo oscuro */
 .swal2-popup { background: var(--ac-surface) !important; color: var(--ac-text) !important; }
+
+/* Desplegable de distritos (cotizador) */
+.panel-distritos {
+  background: var(--ac-surface) !important;
+  border: 1px solid var(--ac-border);
+  border-radius: 14px !important;
+  padding: 6px !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .5) !important;
+
+  .mat-mdc-option {
+    border-radius: 10px;
+    margin: 2px 0;
+    min-height: 42px;
+    font-size: .92rem;
+
+    &:hover:not(.mdc-list-item--disabled) { background: var(--ac-surface-2); }
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background: rgba(255, 46, 139, .14);
+      .mdc-list-item__primary-text { color: var(--ac-magenta); }
+    }
+  }
+}

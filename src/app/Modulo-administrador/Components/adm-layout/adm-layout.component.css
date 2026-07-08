@@ -31,6 +31,8 @@
 }
 .menu a:hover { background: var(--ac-surface-2); color: var(--ac-text); }
 .menu a.activo { background: var(--ac-gradient-diag); color: #0b0b12; font-weight: 700; }
+.menu-spacer { flex: 1; }
+.menu a.volver-web { border-top: 1px solid var(--ac-border); border-radius: 0; padding-top: 16px; }
 
 .contenido { padding: 28px; overflow: auto; background: var(--ac-bg); }
 

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -36,6 +37,7 @@ export class ClCotizadorComponent implements OnInit {
   private catalogoService = inject(MaeCatalogoService);
   private cotizacionService = inject(ClCotizacionService);
   private noti = inject(NotificacionService);
+  private location = inject(Location);
 
   paquetes: Paquete[] = [];
   distritos: Distrito[] = [];
@@ -57,6 +59,8 @@ export class ClCotizadorComponent implements OnInit {
   emailCliente = '';
   observaciones = '';
 
+  readonly whatsapp = '51993771153';
+
   resultado: CotizacionResultado | null = null;
   calculando = false;
   enviando = false;
@@ -68,6 +72,15 @@ export class ClCotizadorComponent implements OnInit {
     this.catalogoService.listarDistritos().subscribe(d => (this.distritos = d));
     this.catalogoService.listarMusicos().subscribe(m => (this.musicos = m));
     this.catalogoService.listarServicios().subscribe(s => (this.servicios = s));
+  }
+
+  volver(): void {
+    this.location.back();
+  }
+
+  get waLink(): string {
+    const msg = 'Hola, estoy cotizando mi evento con Agrupación Agua Cristalina y tengo una consulta 🎶';
+    return `https://wa.me/${this.whatsapp}?text=${encodeURIComponent(msg)}`;
   }
 
   get esFinDeSemana(): boolean {
@@ -87,6 +100,9 @@ export class ClCotizadorComponent implements OnInit {
 
   paqueteSel(): Paquete | undefined {
     return this.paquetes.find(p => p.id === this.paqueteId);
+  }
+  distritoSel(): Distrito | undefined {
+    return this.distritos.find(d => d.id === this.distritoId);
   }
   esProyector(s: ServicioExtra): boolean {
     return /proyector/i.test(s.nombre);

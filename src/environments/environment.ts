@@ -7,6 +7,6 @@ export const environment = {
 
   // 🔌 Interruptor de datos:
   //   true  -> datos de prueba en memoria (no necesita BD ni backend)
-  //   false -> consume la API real (en casa, tras correr los scripts SQL)
-  useMock: true,
+  //   false -> consume la API real (backend .NET + SQL Server)
+  useMock: false,
 };

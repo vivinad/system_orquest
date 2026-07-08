@@ -1,5 +1,11 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+# Backend .NET (artefactos de compilación)
+backend_orquesta/**/bin/
+backend_orquesta/**/obj/
+backend_orquesta/**/.vs/
+backend_orquesta/**/*.csproj.user
+
 # Compiled output
 /dist
 /tmp

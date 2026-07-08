@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Paquete, Distrito, MusicoAdicional, ServicioExtra } from '../Models/mae-catalogo.model';
-import { MOCK_PAQUETES, MOCK_DISTRITOS, MOCK_MUSICOS, MOCK_SERVICIOS } from './mae-datos-demo';
+import { Paquete, Distrito, MusicoAdicional, ServicioExtra, Evento } from '../Models/mae-catalogo.model';
+import { MOCK_PAQUETES, MOCK_DISTRITOS, MOCK_MUSICOS, MOCK_SERVICIOS, MOCK_EVENTOS } from './mae-datos-demo';
 
 @Injectable({ providedIn: 'root' })
 export class MaeCatalogoService {
@@ -33,6 +33,51 @@ export class MaeCatalogoService {
     return environment.useMock
       ? of(MOCK_SERVICIOS.filter(s => s.activo)).pipe(delay(150))
       : this.http.get<ServicioExtra[]>(this.apiURL + 'servicioextra');
+  }
+
+  // ---------- Eventos ----------
+  listarEventos(): Observable<Evento[]> {
+    return environment.useMock
+      ? of(MOCK_EVENTOS.filter(e => e.activo)).pipe(delay(150))
+      : this.http.get<Evento[]>(this.apiURL + 'evento');
+  }
+
+  listarEventosVigentes(): Observable<Evento[]> {
+    if (environment.useMock) {
+      const hoy = new Date().toISOString().slice(0, 10);
+      return of(MOCK_EVENTOS.filter(e => e.activo && e.fecha >= hoy)).pipe(delay(150));
+    }
+    return this.http.get<Evento[]>(this.apiURL + 'evento/vigentes');
+  }
+
+  grabarEvento(e: Partial<Evento>): Observable<Evento> {
+    if (environment.useMock) {
+      const nuevo: Evento = {
+        id: Math.max(0, ...MOCK_EVENTOS.map(x => x.id)) + 1,
+        activo: true, titulo: '', fechaTexto: '', fecha: '', lugar: '', direccion: '', imagenUrl: '', ...e,
+      } as Evento;
+      MOCK_EVENTOS.push(nuevo);
+      return of(nuevo).pipe(delay(150));
+    }
+    return this.http.post<Evento>(this.apiURL + 'evento', e);
+  }
+
+  actualizarEvento(e: Evento): Observable<void> {
+    if (environment.useMock) {
+      const i = MOCK_EVENTOS.findIndex(x => x.id === e.id);
+      if (i >= 0) MOCK_EVENTOS[i] = { ...e };
+      return of(void 0).pipe(delay(150));
+    }
+    return this.http.put<void>(this.apiURL + 'evento/' + e.id, e);
+  }
+
+  eliminarEvento(id: number): Observable<void> {
+    if (environment.useMock) {
+      const i = MOCK_EVENTOS.findIndex(x => x.id === id);
+      if (i >= 0) MOCK_EVENTOS[i].activo = false;
+      return of(void 0).pipe(delay(150));
+    }
+    return this.http.delete<void>(this.apiURL + 'evento/' + id);
   }
 
   // ---------- CRUD de Paquete (admin) ----------
