@@ -1,11 +1,12 @@
 h1 { margin-top: 0; }
 .intro { color: var(--ac-text-muted); margin-top: -8px; }
-.grid { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+.grid { display: grid; grid-template-columns: 1fr 440px; gap: 20px; align-items: start; }
 @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 .tabla { width: 100%; background: transparent; }
 mat-card { background: var(--ac-surface); border: 1px solid var(--ac-border); }
-.form { padding: 18px; display: flex; flex-direction: column; }
+.form { padding: 24px; display: flex; flex-direction: column; }
 .form h3 { margin-top: 0; }
+.form mat-form-field { margin-bottom: 8px; }
 .fila { display: flex; gap: 12px; }
 .fila mat-form-field { flex: 1; }
 .acciones { display: flex; gap: 10px; }

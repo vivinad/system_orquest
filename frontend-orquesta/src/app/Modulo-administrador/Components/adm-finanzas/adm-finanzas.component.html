@@ -51,7 +51,7 @@
     </mat-form-field>
     <mat-form-field appearance="outline">
       <mat-label>Monto (S/)</mat-label>
-      <input matInput type="number" [(ngModel)]="nuevo.monto">
+      <input matInput type="number" min="0" [(ngModel)]="nuevo.monto">
     </mat-form-field>
     <button matButton="filled" class="btn-gradiente" (click)="guardar()">Agregar</button>
   </mat-card>

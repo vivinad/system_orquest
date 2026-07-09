@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using backend_orquesta.Data;
 using backend_orquesta.Models;
 
@@ -73,6 +74,29 @@ namespace backend_orquesta.Controllers
         [HttpPost]
         public async Task<ActionResult<Finanza>> CrearFinanza(Finanza finanza)
         {
+            if (finanza.Monto <= 0)
+                return BadRequest("El monto debe ser mayor a 0.");
+
+            // El frontend no envía adminId: se toma del token del admin logueado,
+            // o del primer admin activo como respaldo (p. ej. pruebas desde Swagger).
+            if (finanza.AdminId == 0)
+            {
+                var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (claim != null && int.TryParse(claim, out var idToken))
+                {
+                    finanza.AdminId = idToken;
+                }
+                else
+                {
+                    var adminId = await _context.UsuariosAdmin
+                        .Where(u => u.Activo)
+                        .Select(u => (int?)u.Id)
+                        .FirstOrDefaultAsync();
+                    if (adminId == null) return BadRequest("No existe un administrador registrado.");
+                    finanza.AdminId = adminId.Value;
+                }
+            }
+
             _context.Finanzas.Add(finanza);
             await _context.SaveChangesAsync();
             return Ok(finanza);
@@ -83,6 +107,8 @@ namespace backend_orquesta.Controllers
         public async Task<IActionResult> EditarFinanza(int id, Finanza finanza)
         {
             if (id != finanza.Id) return BadRequest();
+            if (finanza.Monto <= 0)
+                return BadRequest("El monto debe ser mayor a 0.");
             _context.Entry(finanza).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();

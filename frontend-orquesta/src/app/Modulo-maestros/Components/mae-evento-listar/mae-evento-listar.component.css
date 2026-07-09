@@ -1,12 +1,23 @@
 h1 { margin-top: 0; }
 .intro { color: var(--ac-text-muted); margin-top: -8px; }
-.grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: start; }
-@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+/* Tabla arriba y formulario abajo, uno debajo del otro */
+.grid { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; }
+
+/* La tabla mantiene siempre la misma altura; si hay muchos eventos, aparece scroll */
+.tabla-scroll { max-height: 380px; overflow-y: auto; }
 .tabla { width: 100%; background: transparent; }
+.tabla th { position: sticky; top: 0; background: var(--ac-surface); z-index: 1; }
+
 mat-card { background: var(--ac-surface); border: 1px solid var(--ac-border); }
-.form { padding: 18px; display: flex; flex-direction: column; }
+.form { padding: 24px; display: flex; flex-direction: column; }
 .form h3 { margin-top: 0; }
 .form mat-form-field { margin-bottom: 6px; }
+
+/* Campos a la izquierda; mapa y flyer a la derecha */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; align-items: start; }
+.form-grid .col { display: flex; flex-direction: column; }
+.form-grid mat-form-field { width: 100%; }
+@media (max-width: 860px) { .form-grid { grid-template-columns: 1fr; } }
 .form mat-form-field.con-hint { margin-bottom: 20px; }
 .mapa-preview { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 14px; }
 .mapa-preview iframe {

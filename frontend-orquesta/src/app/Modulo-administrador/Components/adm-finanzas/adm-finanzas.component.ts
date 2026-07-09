@@ -38,10 +38,19 @@ export class AdmFinanzasComponent implements OnInit {
       this.noti.error('Descripción y monto son obligatorios.');
       return;
     }
-    this.finanzaService.crear(this.nuevo).subscribe(() => {
-      this.noti.toast('Movimiento registrado.');
-      this.nuevo = { tipo: 'ingreso', descripcion: '', categoria: '', monto: 0 };
-      this.cargar();
+    if (this.nuevo.monto <= 0) {
+      this.noti.error('El monto debe ser mayor a 0.');
+      return;
+    }
+    this.finanzaService.crear(this.nuevo).subscribe({
+      next: () => {
+        this.noti.toast('Movimiento registrado.');
+        this.nuevo = { tipo: 'ingreso', descripcion: '', categoria: '', monto: 0 };
+        this.cargar();
+      },
+      error: (e) => {
+        this.noti.error(typeof e?.error === 'string' ? e.error : 'No se pudo registrar el movimiento.');
+      },
     });
   }
 
