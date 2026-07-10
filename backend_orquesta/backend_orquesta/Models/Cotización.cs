@@ -32,6 +32,18 @@ namespace backend_orquesta.Models
         [Column("fecha_evento")]
         public DateTime FechaEvento { get; set; }
 
+        // Ubicación exacta del evento (local/dirección donde tocará la orquesta)
+        [Column("direccion_evento")]
+        public string? DireccionEvento { get; set; }
+
+        // Hora de inicio del evento (formato HH:mm)
+        [Column("hora_inicio")]
+        public string? HoraInicio { get; set; }
+
+        // Tipo de evento (boda, cumpleaños...) — define la vestimenta de la orquesta
+        [Column("tipo_evento")]
+        public string? TipoEvento { get; set; }
+
         [Column("dia_semana")]
         public string DiaSemana { get; set; } = string.Empty;
 

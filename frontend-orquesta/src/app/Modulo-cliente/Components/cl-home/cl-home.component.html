@@ -5,6 +5,7 @@
   </a>
   <nav class="links">
     <a href="#eventos">Eventos</a>
+    <a href="#videos">Videos</a>
     <a href="#nosotros">Nosotros</a>
     <a routerLink="/login" class="admin">Admin</a>
   </nav>
@@ -106,6 +107,41 @@
   </section>
 }
 
+<!-- ===== Videos ===== -->
+@if (videosYT.length > 0) {
+  <section id="videos" class="videos">
+    <div class="contenedor">
+      <h2 class="seccion-titulo"> <span class="texto-gradiente">ESCUCHANOS</span></h2>
+      <p class="seccion-sub">Un adelanto de lo que Agua Cristalina lleva a tu evento.</p>
+      <div class="video-frame video-principal">
+        <iframe [src]="videoDe(videoActual)" loading="lazy" allowfullscreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                referrerpolicy="strict-origin-when-cross-origin"
+                title="Video de Agua Cristalina"></iframe>
+      </div>
+      @if (videosYT.length > 1) {
+        <div class="thumbs-carrusel">
+          <button type="button" class="thumb-flecha" (click)="desplazarThumbs(-1)" aria-label="Videos anteriores">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <div class="video-thumbs" #thumbsRow>
+            @for (v of videosYT; track v) {
+              <button type="button" class="thumb" [class.activa]="v === videoActual"
+                      (click)="seleccionarVideo(v)" title="Reproducir este video">
+                <img [src]="miniaturaDe(v)" alt="Miniatura de video" loading="lazy">
+                <mat-icon>play_circle</mat-icon>
+              </button>
+            }
+          </div>
+          <button type="button" class="thumb-flecha" (click)="desplazarThumbs(1)" aria-label="Videos siguientes">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+}
+
 <!-- ===== Nosotros ===== -->
 <section id="nosotros" class="nosotros">
   <div class="contenedor">
@@ -135,6 +171,12 @@
         <span class="red-nombre">Instagram</span>
         <span class="red-user">&#64;wendy.agua.cristalina</span>
         <span class="red-btn">Síguenos</span>
+      </a>
+      <a class="red-card youtube" href="https://www.youtube.com/@wendyysuaguacristalina1667" target="_blank" rel="noopener">
+        <div class="red-foto"><img [src]="miniaturaDe(videosYT[0])" alt="Agua Cristalina en YouTube"></div>
+        <span class="red-nombre">YouTube</span>
+        <span class="red-user">Wendy y su Agua Cristalina</span>
+        <span class="red-btn">Suscríbete</span>
       </a>
       <a class="red-card whatsapp" [href]="waLink" target="_blank" rel="noopener">
         <div class="red-foto"><img src="whatsApp.png" alt="Agua Cristalina en WhatsApp"></div>
@@ -167,6 +209,9 @@
     </div>
   </div>
 </section>
+
+<!-- ===== Métodos de pago (informativo) ===== -->
+<cl-metodos-pago />
 
 <footer class="pie">
   <span class="texto-gradiente brand-pie">Agua Cristalina</span>

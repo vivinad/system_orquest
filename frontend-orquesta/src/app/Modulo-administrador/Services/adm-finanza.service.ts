@@ -38,4 +38,28 @@ export class AdmFinanzaService {
     }
     return this.http.post<Finanza>(this.apiURL, f);
   }
+
+  actualizar(f: Finanza): Observable<void> {
+    if (environment.useMock) {
+      const i = MOCK_FINANZAS.findIndex(x => x.id === f.id);
+      if (i >= 0) MOCK_FINANZAS[i] = { ...f };
+      return of(void 0).pipe(delay(150));
+    }
+    // Solo los campos del modelo (sin navegaciones que devuelve el GET)
+    const payload: Finanza = {
+      id: f.id, adminId: f.adminId, cotizacionId: f.cotizacionId,
+      tipo: f.tipo, monto: f.monto, descripcion: f.descripcion,
+      categoria: f.categoria, fecha: f.fecha,
+    };
+    return this.http.put<void>(`${this.apiURL}/${f.id}`, payload);
+  }
+
+  eliminar(id: number): Observable<void> {
+    if (environment.useMock) {
+      const i = MOCK_FINANZAS.findIndex(x => x.id === id);
+      if (i >= 0) MOCK_FINANZAS.splice(i, 1);
+      return of(void 0).pipe(delay(150));
+    }
+    return this.http.delete<void>(`${this.apiURL}/${id}`);
+  }
 }

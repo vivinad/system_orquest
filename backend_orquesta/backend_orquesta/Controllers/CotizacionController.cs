@@ -13,6 +13,9 @@ namespace backend_orquesta.Controllers
         private static readonly string[] DIAS =
             { "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado" };
 
+        // Estados que bloquean la fecha: ya hay un contrato asegurado ese día
+        private static readonly string[] ESTADOS_OCUPADOS = { "confirmada", "pagada", "realizada" };
+
         private readonly OrquestaDbContext _context;
         private readonly ContratoPdfService _contratoPdfService;
         private readonly IWebHostEnvironment _env;
@@ -33,12 +36,33 @@ namespace backend_orquesta.Controllers
             return resultado;
         }
 
+        // GET: api/cotizacion/fecha-ocupada?fecha=2026-07-15
+        // Indica si la orquesta ya tiene un evento asegurado ese día
+        [HttpGet("fecha-ocupada")]
+        public async Task<IActionResult> FechaOcupada(string fecha)
+        {
+            if (!DateTime.TryParse(fecha, out var dia))
+                return BadRequest(new { mensaje = "Fecha no válida." });
+
+            var ocupada = await _context.Cotizaciones
+                .AnyAsync(c => c.FechaEvento.Date == dia.Date && ESTADOS_OCUPADOS.Contains(c.Estado));
+
+            return Ok(new { ocupada });
+        }
+
         // POST: api/cotizacion — crear la cotización (estado 'pendiente')
         [HttpPost]
         public async Task<ActionResult<Cotizacion>> Crear(CotizacionRequest req)
         {
             var r = await CalcularInterno(req);
             if (r == null) return BadRequest(new { mensaje = "Paquete o distrito no válido." });
+
+            // No se aceptan cotizaciones para un día con contrato ya asegurado
+            var fechaEvento = DateTime.Parse(req.FechaEvento);
+            var diaOcupado = await _context.Cotizaciones
+                .AnyAsync(c => c.FechaEvento.Date == fechaEvento.Date && ESTADOS_OCUPADOS.Contains(c.Estado));
+            if (diaOcupado)
+                return Conflict(new { mensaje = "La orquesta ya tiene un evento confirmado ese día." });
 
             var cotizacion = new Cotizacion
             {
@@ -50,6 +74,9 @@ namespace backend_orquesta.Controllers
                 PaqueteId = req.PaqueteId,
                 DistritoId = req.DistritoId,
                 FechaEvento = DateTime.Parse(req.FechaEvento),
+                DireccionEvento = req.DireccionEvento,
+                HoraInicio = req.HoraInicio,
+                TipoEvento = req.TipoEvento,
                 DiaSemana = r.DiaSemana,
                 HorasSolicitadas = req.HorasSolicitadas,
                 CostoPaquete = r.CostoPaquete,
@@ -239,6 +266,9 @@ namespace backend_orquesta.Controllers
         public int PaqueteId { get; set; }
         public int DistritoId { get; set; }
         public string FechaEvento { get; set; } = string.Empty; // 'YYYY-MM-DD'
+        public string? DireccionEvento { get; set; }
+        public string? HoraInicio { get; set; }
+        public string? TipoEvento { get; set; }
         public int HorasSolicitadas { get; set; }
         public List<MusicoSeleccion> Musicos { get; set; } = new();
         public List<int> ServiciosExtra { get; set; } = new();

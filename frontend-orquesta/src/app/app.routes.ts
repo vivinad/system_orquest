@@ -54,6 +54,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./Modulo-maestros/Components/mae-evento-listar/mae-evento-listar.component').then(m => m.MaeEventoListarComponent),
       },
+      {
+        path: 'contenido',
+        loadComponent: () =>
+          import('./Modulo-maestros/Components/mae-media-listar/mae-media-listar.component').then(m => m.MaeMediaListarComponent),
+      },
     ],
   },
 

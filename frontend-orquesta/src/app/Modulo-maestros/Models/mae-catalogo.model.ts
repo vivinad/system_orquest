@@ -35,6 +35,14 @@ export interface Evento {
   activo: boolean;
 }
 
+/** Video de YouTube o foto de portada que se muestra en el home */
+export interface MediaHome {
+  id: number;
+  tipo: 'video' | 'foto';
+  valor: string; // ID del video de YouTube, o la imagen (archivo o base64)
+  orden: number;
+}
+
 export interface ServicioExtra {
   id: number;
   nombre: string;

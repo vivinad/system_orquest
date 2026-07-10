@@ -1,8 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -13,7 +15,7 @@ import { Finanza, ResumenFinanzas } from '../../Models/adm-finanza.model';
 @Component({
   selector: 'adm-finanzas',
   standalone: true,
-  imports: [FormsModule, MatTableModule, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [SlicePipe, FormsModule, MatTableModule, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './adm-finanzas.component.html',
   styleUrls: ['./adm-finanzas.component.css'],
 })
@@ -23,8 +25,8 @@ export class AdmFinanzasComponent implements OnInit {
 
   resumen: ResumenFinanzas | null = null;
   lista: Finanza[] = [];
-  columnas = ['fecha', 'descripcion', 'tipo', 'monto'];
-  nuevo: Partial<Finanza> = { tipo: 'ingreso', descripcion: '', categoria: '', monto: 0 };
+  columnas = ['fecha', 'descripcion', 'tipo', 'monto', 'acciones'];
+  editando: Partial<Finanza> = this.nuevoMovimiento();
 
   ngOnInit(): void { this.cargar(); }
 
@@ -33,24 +35,46 @@ export class AdmFinanzasComponent implements OnInit {
     this.finanzaService.listar().subscribe(l => (this.lista = l));
   }
 
+  nuevoMovimiento(): Partial<Finanza> {
+    return { tipo: 'ingreso', descripcion: '', categoria: '', monto: 0 };
+  }
+  limpiar(): void { this.editando = this.nuevoMovimiento(); }
+  editar(f: Finanza): void { this.editando = { ...f }; }
+
   guardar(): void {
-    if (!this.nuevo.descripcion || !this.nuevo.monto) {
+    if (!this.editando.descripcion || !this.editando.monto) {
       this.noti.error('Descripción y monto son obligatorios.');
       return;
     }
-    if (this.nuevo.monto <= 0) {
+    if (this.editando.monto <= 0) {
       this.noti.error('El monto debe ser mayor a 0.');
       return;
     }
-    this.finanzaService.crear(this.nuevo).subscribe({
+    const onOk = () => {
+      this.noti.toast(this.editando.id ? 'Movimiento actualizado.' : 'Movimiento registrado.');
+      this.limpiar();
+      this.cargar();
+    };
+    const onError = (e: { error?: unknown }) => {
+      this.noti.error(typeof e?.error === 'string' ? e.error : 'No se pudo guardar el movimiento.');
+    };
+    if (this.editando.id) {
+      this.finanzaService.actualizar(this.editando as Finanza).subscribe({ next: onOk, error: onError });
+    } else {
+      this.finanzaService.crear(this.editando).subscribe({ next: onOk, error: onError });
+    }
+  }
+
+  async eliminar(f: Finanza): Promise<void> {
+    const ok = await this.noti.confirmar(`¿Eliminar el movimiento "${f.descripcion}" de ${this.pen(f.monto)}?`);
+    if (!ok) return;
+    this.finanzaService.eliminar(f.id).subscribe({
       next: () => {
-        this.noti.toast('Movimiento registrado.');
-        this.nuevo = { tipo: 'ingreso', descripcion: '', categoria: '', monto: 0 };
+        this.noti.toast('Movimiento eliminado.');
+        if (this.editando.id === f.id) this.limpiar();
         this.cargar();
       },
-      error: (e) => {
-        this.noti.error(typeof e?.error === 'string' ? e.error : 'No se pudo registrar el movimiento.');
-      },
+      error: () => this.noti.error('No se pudo eliminar el movimiento.'),
     });
   }
 

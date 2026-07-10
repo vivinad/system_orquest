@@ -13,6 +13,9 @@ export class CotizacionRequest {
   paqueteId = 0;
   distritoId = 0;
   fechaEvento = '';        // 'YYYY-MM-DD'
+  direccionEvento?: string; // ubicación exacta del local del evento
+  horaInicio?: string;      // 'HH:mm'
+  tipoEvento?: string;      // boda, cumpleaños... (define la vestimenta)
   horasSolicitadas = 0;
   musicos: MusicoSeleccionado[] = [];
   serviciosExtra: number[] = [];
@@ -52,6 +55,9 @@ export interface Cotizacion {
   paqueteId: number;
   distritoId: number;
   fechaEvento: string;
+  direccionEvento?: string;
+  horaInicio?: string;
+  tipoEvento?: string;
   diaSemana: string;
   horasSolicitadas: number;
   costoPaquete: number;

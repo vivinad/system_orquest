@@ -26,7 +26,8 @@
 } @else {
   <div class="layout">
     <div class="pasos">
-      <mat-stepper orientation="horizontal" [linear]="true" #stepper>
+      <mat-stepper orientation="horizontal" [linear]="true" #stepper
+                   (selectionChange)="pasoActual = $event.selectedIndex">
 
         <!-- Paso 1: ¿Cuántos integrantes? -->
         <mat-step label="¿Cuántos integrantes deseas?" [completed]="!!paqueteId">
@@ -73,13 +74,37 @@
               </mat-select>
             </mat-form-field>
 
+            <mat-form-field appearance="outline" class="ancho">
+              <mat-label>Ubicación exacta del evento</mat-label>
+              <mat-icon matIconPrefix>place</mat-icon>
+              <input matInput [(ngModel)]="direccionEvento" required
+                     placeholder="Nombre del local o dirección exacta">
+            </mat-form-field>
+
             <mat-form-field appearance="outline">
               <mat-label>Fecha del evento</mat-label>
               <mat-icon matIconPrefix>event</mat-icon>
               <input matInput [matDatepicker]="picker" [min]="hoy"
-                     [(ngModel)]="fechaEvento" (dateChange)="recalcular()">
+                     [(ngModel)]="fechaEvento" (dateChange)="fechaCambiada()">
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de inicio</mat-label>
+              <mat-icon matIconPrefix>access_time</mat-icon>
+              <input matInput type="time" [(ngModel)]="horaInicio" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de evento</mat-label>
+              <mat-icon matIconPrefix>celebration</mat-icon>
+              <mat-select [(ngModel)]="tipoEvento">
+                @for (t of tiposEvento; track t) {
+                  <mat-option [value]="t">{{ t }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>Nos ayuda a elegir la vestimenta adecuada</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -156,7 +181,10 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Teléfono / WhatsApp</mat-label>
-              <input matInput [(ngModel)]="telefonoCliente" required>
+              <input matInput [(ngModel)]="telefonoCliente" required
+                     maxlength="9" inputmode="numeric"
+                     (ngModelChange)="telefonoCliente = soloDigitos($event, 9)">
+              <mat-hint>9 dígitos</mat-hint>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Correo (opcional)</mat-label>
@@ -164,7 +192,9 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>DNI</mat-label>
-              <input matInput [(ngModel)]="dniCliente" required>
+              <input matInput [(ngModel)]="dniCliente" required
+                     maxlength="8" inputmode="numeric"
+                     (ngModelChange)="dniCliente = soloDigitos($event, 8)">
             </mat-form-field>
             <mat-form-field appearance="outline" class="ancho">
               <mat-label>Dirección (para el contrato)</mat-label>
@@ -268,7 +298,16 @@
   </div>
 }
 
+<!-- ===== Métodos de pago (informativo) ===== -->
+<cl-metodos-pago />
+
 <!-- ===== WhatsApp flotante ===== -->
+@if (pasoActual === 1 && fechaEvento && esFinDeSemana && !enviado) {
+  <div class="wa-burbuja">
+    ¿Evento de 4 horas? Escríbenos aquí
+    <span class="wa-burbuja-flecha"></span>
+  </div>
+}
 <a [href]="waLink" target="_blank" rel="noopener" class="wa-float" title="Escríbenos por WhatsApp">
   <mat-icon>chat</mat-icon>
 </a>

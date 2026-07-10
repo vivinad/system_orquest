@@ -1,0 +1,17 @@
+.metodos {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 26px 16px; background: var(--ac-bg-2); border-top: 1px solid var(--ac-border);
+}
+.metodos-titulo {
+  color: var(--ac-text-muted); font-size: 1.05rem;
+  letter-spacing: .6px; text-transform: uppercase;
+}
+.metodos-logos {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 30px;
+}
+.metodos-logos img {
+  height: 68px; width: auto; border-radius: 10px;
+  transition: transform .2s;
+}
+.metodos-logos img:hover { transform: scale(1.08); }
+@media (max-width: 600px) { .metodos-logos img { height: 48px; } .metodos-logos { gap: 18px; } }

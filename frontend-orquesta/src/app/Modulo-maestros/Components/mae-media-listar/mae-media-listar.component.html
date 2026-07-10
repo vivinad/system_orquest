@@ -1,0 +1,50 @@
+<h1>Contenido web</h1>
+<p class="intro">Administra los videos de YouTube y las fotos de portada que se muestran en la página principal.</p>
+
+<div class="grid">
+  <mat-card class="panel">
+    <h3><mat-icon>smart_display</mat-icon> Videos de YouTube</h3>
+    <p class="ayuda">Pega el enlace del video (Compartir → Copiar) y presiona Agregar. Aparece en la sección "Escúchanos".</p>
+    <div class="agregar">
+      <mat-form-field appearance="outline" class="campo">
+        <mat-label>Enlace del video</mat-label>
+        <input matInput [(ngModel)]="nuevoVideo" placeholder="https://www.youtube.com/watch?v=..."
+               (keyup.enter)="agregarVideo()">
+      </mat-form-field>
+      <button matButton="filled" class="btn" (click)="agregarVideo()">Agregar</button>
+    </div>
+    <div class="items">
+      @for (v of videos; track v.id) {
+        <div class="item">
+          <img [src]="miniaturaDe(v.valor)" alt="Miniatura del video">
+          <button matIconButton class="quitar" (click)="eliminar(v)" title="Quitar del home">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+      @if (videos.length === 0) { <p class="vacio">Aún no hay videos.</p> }
+    </div>
+  </mat-card>
+
+  <mat-card class="panel">
+    <h3><mat-icon>photo_library</mat-icon> Fotos de portada</h3>
+    <p class="ayuda">Son las fotos de fondo que van rotando en la parte de arriba de la página principal.</p>
+    <div class="agregar">
+      <input type="file" accept="image/*" hidden #fotoInput (change)="fotoSeleccionada($event)">
+      <button matButton="outlined" (click)="fotoInput.click()">
+        <mat-icon>add_photo_alternate</mat-icon> Subir foto
+      </button>
+    </div>
+    <div class="items">
+      @for (f of fotos; track f.id) {
+        <div class="item">
+          <img [src]="f.valor" alt="Foto de portada">
+          <button matIconButton class="quitar" (click)="eliminar(f)" title="Quitar de la portada">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+      @if (fotos.length === 0) { <p class="vacio">Aún no hay fotos.</p> }
+    </div>
+  </mat-card>
+</div>

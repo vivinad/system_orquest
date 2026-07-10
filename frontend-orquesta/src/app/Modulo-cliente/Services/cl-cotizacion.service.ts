@@ -26,6 +26,18 @@ export class ClCotizacionService {
       : this.http.post<CotizacionResultado>(this.apiURL + '/calcular', req);
   }
 
+  /** ¿La orquesta ya tiene un evento asegurado ese día? (fecha en formato yyyy-MM-dd) */
+  fechaOcupada(fecha: string): Observable<boolean> {
+    if (environment.useMock) {
+      const ocupados = ['confirmada', 'pagada', 'realizada'];
+      const ocupada = MOCK_COTIZACIONES.some(c => c.fechaEvento === fecha && ocupados.includes(c.estado));
+      return of(ocupada).pipe(delay(100));
+    }
+    return this.http
+      .get<{ ocupada: boolean }>(`${this.apiURL}/fecha-ocupada?fecha=${fecha}`)
+      .pipe(map(r => r.ocupada));
+  }
+
   /** Crear la cotización (estado 'pendiente'). */
   crear(req: CotizacionRequest): Observable<Cotizacion> {
     if (environment.useMock) {

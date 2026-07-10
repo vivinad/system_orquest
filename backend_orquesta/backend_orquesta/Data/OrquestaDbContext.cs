@@ -21,5 +21,6 @@ namespace backend_orquesta.Data
         public DbSet<ContratoPdf> ContratosPdf { get; set; }
         public DbSet<Finanza> Finanzas { get; set; }
         public DbSet<Evento> Eventos { get; set; }
+        public DbSet<MediaHome> MediaHomes { get; set; }
     }
 }

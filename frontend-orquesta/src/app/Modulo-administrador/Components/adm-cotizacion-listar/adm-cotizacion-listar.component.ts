@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +15,7 @@ import { Cotizacion } from '../../../Modulo-cliente/Models/cl-cotizacion.model';
 @Component({
   selector: 'adm-cotizacion-listar',
   standalone: true,
-  imports: [FormsModule, MatTableModule, MatCardModule, MatButtonToggleModule, MatFormFieldModule, MatSelectModule, MatIconModule, MatTooltipModule],
+  imports: [SlicePipe, FormsModule, MatTableModule, MatCardModule, MatButtonToggleModule, MatFormFieldModule, MatSelectModule, MatIconModule, MatTooltipModule],
   templateUrl: './adm-cotizacion-listar.component.html',
   styleUrls: ['./adm-cotizacion-listar.component.css'],
 })
@@ -24,7 +25,7 @@ export class AdmCotizacionListarComponent implements OnInit {
 
   lista: Cotizacion[] = [];
   filtro = '';
-  columnas = ['folio', 'cliente', 'evento', 'total', 'estado'];
+  columnas = ['folio', 'cliente', 'evento', 'tipo', 'ubicacion', 'total', 'estado'];
   estados = ['pendiente', 'confirmada', 'pagada', 'realizada', 'rechazada', 'cancelada'];
 
   ngOnInit(): void { this.cargar(); }

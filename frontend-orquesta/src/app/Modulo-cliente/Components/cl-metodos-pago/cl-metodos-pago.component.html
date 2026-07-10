@@ -1,0 +1,8 @@
+<div class="metodos">
+  <span class="metodos-titulo">Aceptamos estos medios de pago</span>
+  <div class="metodos-logos">
+    @for (m of metodos; track m.imagen) {
+      <img [src]="m.imagen" [alt]="'Pago con ' + m.nombre" [title]="m.nombre">
+    }
+  </div>
+</div>

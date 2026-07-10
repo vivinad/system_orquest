@@ -20,6 +20,7 @@ import { Paquete, Distrito, MusicoAdicional, ServicioExtra } from '../../../Modu
 import { ClCotizacionService } from '../../Services/cl-cotizacion.service';
 import { NotificacionService } from '../../../Modulo-seguridad/Services/notificacion.service';
 import { CotizacionRequest, CotizacionResultado } from '../../Models/cl-cotizacion.model';
+import { ClMetodosPagoComponent } from '../cl-metodos-pago/cl-metodos-pago.component';
 
 @Component({
   selector: 'cl-cotizador',
@@ -29,6 +30,7 @@ import { CotizacionRequest, CotizacionResultado } from '../../Models/cl-cotizaci
     FormsModule, RouterLink, MatStepperModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatDatepickerModule,
     MatCheckboxModule, MatCardModule, MatRadioModule, MatProgressSpinnerModule,
+    ClMetodosPagoComponent,
   ],
   templateUrl: './cl-cotizador.component.html',
   styleUrls: ['./cl-cotizador.component.css'],
@@ -48,6 +50,14 @@ export class ClCotizadorComponent implements OnInit {
   paqueteId: number | null = null;
   distritoId: number | null = null;
   fechaEvento: Date | null = null;
+  direccionEvento = '';
+  horaInicio = '';
+  tipoEvento = '';
+  // Opciones de tipo de evento (definen la vestimenta de la orquesta)
+  readonly tiposEvento = [
+    'Boda', 'Cumpleaños', 'Quinceañero', 'Aniversario',
+    'Fiestas Patrias', 'Fiesta patronal', 'Evento corporativo', 'Otro',
+  ];
   horas = 5;
   hoy = new Date();
   cantidades: Record<number, number> = {};
@@ -64,6 +74,7 @@ export class ClCotizadorComponent implements OnInit {
   readonly whatsapp = '51993771153';
 
   resultado: CotizacionResultado | null = null;
+  pasoActual = 0; // índice del paso activo del stepper (la burbuja de WhatsApp solo sale en "Tu evento")
   calculando = false;
   enviando = false;
   enviado = false;
@@ -95,11 +106,18 @@ export class ClCotizadorComponent implements OnInit {
     return this.esFinDeSemana ? 4 : 3;
   }
   get datosEventoOk(): boolean {
-    return !!this.paqueteId && !!this.distritoId && !!this.fechaEvento && this.horas >= this.minHoras;
+    return !!this.paqueteId && !!this.distritoId && !!this.fechaEvento
+      && this.direccionEvento.trim().length > 4 && !!this.horaInicio && !!this.tipoEvento
+      && this.horas >= this.minHoras;
   }
   get contactoOk(): boolean {
-    return this.nombreCliente.trim().length > 1 && this.telefonoCliente.trim().length >= 6
+    return this.nombreCliente.trim().length > 1 && this.telefonoCliente.trim().length === 9
       && this.dniCliente.trim().length >= 8 && this.direccionCliente.trim().length > 4;
+  }
+
+  // Deja solo números y recorta al máximo indicado (p. ej. teléfono de 9 dígitos)
+  soloDigitos(valor: string, max: number): string {
+    return (valor || '').replace(/\D/g, '').slice(0, max);
   }
 
   // Habilita el botón "Siguiente paso" centralizado junto al Resumen, según el paso activo
@@ -134,6 +152,21 @@ export class ClCotizadorComponent implements OnInit {
     this.recalcular();
   }
 
+  // Al elegir fecha: primero se verifica que la orquesta no tenga
+  // un evento ya asegurado ese día; si está libre, se cotiza normal.
+  fechaCambiada(): void {
+    if (!this.fechaEvento) { this.recalcular(); return; }
+    this.cotizacionService.fechaOcupada(this.formatoFecha(this.fechaEvento)).subscribe(ocupada => {
+      if (ocupada) {
+        this.fechaEvento = null;
+        this.resultado = null;
+        this.noti.error('La orquesta ya tiene un evento confirmado ese día.', 'Día no disponible');
+      } else {
+        this.recalcular();
+      }
+    });
+  }
+
   recalcular(): void {
     if (!this.datosEventoOk) {
       this.resultado = null;
@@ -156,6 +189,9 @@ export class ClCotizadorComponent implements OnInit {
     req.paqueteId = this.paqueteId!;
     req.distritoId = this.distritoId!;
     req.fechaEvento = this.formatoFecha(this.fechaEvento!);
+    req.direccionEvento = this.direccionEvento.trim() || undefined;
+    req.horaInicio = this.horaInicio || undefined;
+    req.tipoEvento = this.tipoEvento || undefined;
     req.horasSolicitadas = this.horas;
     req.musicos = Object.entries(this.cantidades)
       .filter(([, c]) => c > 0)
@@ -184,9 +220,10 @@ export class ClCotizadorComponent implements OnInit {
         this.folio = c.id;
         this.noti.exito('Te contactaremos muy pronto.', '¡Cotización enviada!');
       },
-      error: () => {
+      error: (e) => {
         this.enviando = false;
-        this.noti.error('Hubo un problema al enviar. Intenta de nuevo.');
+        // 409 = el día se ocupó (p. ej. el admin confirmó otro contrato mientras cotizaba)
+        this.noti.error(e?.error?.mensaje ?? 'Hubo un problema al enviar. Intenta de nuevo.');
       },
     });
   }
