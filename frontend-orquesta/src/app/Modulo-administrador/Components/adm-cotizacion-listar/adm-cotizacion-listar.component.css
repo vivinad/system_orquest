@@ -3,6 +3,36 @@ h1 { margin-top: 0; }
 .panel { background: var(--ac-surface); border: 1px solid var(--ac-border); padding: 8px; }
 .tabla { width: 100%; background: transparent; }
 .warn { color: var(--ac-amarillo); vertical-align: middle; font-size: 18px; height: 18px; width: 18px; }
-.sel-estado { width: 150px; }
 .vacio { color: var(--ac-text-muted); padding: 24px; text-align: center; }
 small { color: var(--ac-text-muted); }
+
+/* Estado: píldora sólida de color según el valor (no un select con borde) */
+.sel-estado {
+  width: 148px;
+  --mdc-outlined-text-field-container-shape: 999px;
+  --mdc-outlined-text-field-outline-color: transparent;
+  --mdc-outlined-text-field-hover-outline-color: transparent;
+  --mdc-outlined-text-field-focus-outline-color: transparent;
+}
+.sel-estado .mat-mdc-text-field-wrapper { padding: 0 8px; }
+.sel-estado .mat-mdc-form-field-infix { padding-top: 8px; padding-bottom: 8px; min-height: 0; }
+
+.estado-pendiente { --mdc-outlined-text-field-container-color: var(--ac-amarillo); }
+.estado-pendiente .mat-mdc-select-value, .estado-pendiente .mat-mdc-select-arrow { color: #3a2f00 !important; }
+
+.estado-confirmada { --mdc-outlined-text-field-container-color: #4da3ff; }
+.estado-confirmada .mat-mdc-select-value, .estado-confirmada .mat-mdc-select-arrow { color: #062038 !important; }
+
+.estado-pagada { --mdc-outlined-text-field-container-color: var(--ac-verde); }
+.estado-pagada .mat-mdc-select-value, .estado-pagada .mat-mdc-select-arrow { color: #06210a !important; }
+
+.estado-realizada { --mdc-outlined-text-field-container-color: #aeaec2; }
+.estado-realizada .mat-mdc-select-value, .estado-realizada .mat-mdc-select-arrow { color: #1a1a24 !important; }
+
+.estado-rechazada { --mdc-outlined-text-field-container-color: #ff5252; }
+.estado-rechazada .mat-mdc-select-value, .estado-rechazada .mat-mdc-select-arrow { color: #3a0000 !important; }
+
+.estado-cancelada { --mdc-outlined-text-field-container-color: #6b6b80; }
+.estado-cancelada .mat-mdc-select-value, .estado-cancelada .mat-mdc-select-arrow { color: #fff !important; }
+
+.sel-estado .mat-mdc-select-value { font-weight: 700; }

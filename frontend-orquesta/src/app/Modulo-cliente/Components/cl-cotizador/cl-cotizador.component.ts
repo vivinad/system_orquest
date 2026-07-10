@@ -57,6 +57,8 @@ export class ClCotizadorComponent implements OnInit {
   nombreCliente = '';
   telefonoCliente = '';
   emailCliente = '';
+  dniCliente = '';
+  direccionCliente = '';
   observaciones = '';
 
   readonly whatsapp = '51993771153';
@@ -66,6 +68,7 @@ export class ClCotizadorComponent implements OnInit {
   enviando = false;
   enviado = false;
   folio: number | null = null;
+  descargando = false;
 
   ngOnInit(): void {
     this.catalogoService.listarPaquetes().subscribe(p => (this.paquetes = p));
@@ -95,7 +98,17 @@ export class ClCotizadorComponent implements OnInit {
     return !!this.paqueteId && !!this.distritoId && !!this.fechaEvento && this.horas >= this.minHoras;
   }
   get contactoOk(): boolean {
-    return this.nombreCliente.trim().length > 1 && this.telefonoCliente.trim().length >= 6;
+    return this.nombreCliente.trim().length > 1 && this.telefonoCliente.trim().length >= 6
+      && this.dniCliente.trim().length >= 8 && this.direccionCliente.trim().length > 4;
+  }
+
+  // Habilita el botón "Siguiente paso" centralizado junto al Resumen, según el paso activo
+  puedeAvanzar(indicePaso: number): boolean {
+    switch (indicePaso) {
+      case 0: return !!this.paqueteId;
+      case 1: return this.datosEventoOk;
+      default: return true;
+    }
   }
 
   paqueteSel(): Paquete | undefined {
@@ -113,11 +126,7 @@ export class ClCotizadorComponent implements OnInit {
   }
 
   toggleMusico(m: MusicoAdicional, checked: boolean): void {
-    this.cantidades[m.id] = checked ? (this.cantidades[m.id] || 1) : 0;
-    this.recalcular();
-  }
-  cambiarCantidad(m: MusicoAdicional, valor: number): void {
-    this.cantidades[m.id] = Math.max(0, valor || 0);
+    this.cantidades[m.id] = checked ? 1 : 0;
     this.recalcular();
   }
   toggleServicio(s: ServicioExtra, checked: boolean): void {
@@ -142,6 +151,8 @@ export class ClCotizadorComponent implements OnInit {
     req.nombreCliente = this.nombreCliente;
     req.telefonoCliente = this.telefonoCliente;
     req.emailCliente = this.emailCliente || undefined;
+    req.dniCliente = this.dniCliente || undefined;
+    req.direccionCliente = this.direccionCliente || undefined;
     req.paqueteId = this.paqueteId!;
     req.distritoId = this.distritoId!;
     req.fechaEvento = this.formatoFecha(this.fechaEvento!);
@@ -176,6 +187,21 @@ export class ClCotizadorComponent implements OnInit {
       error: () => {
         this.enviando = false;
         this.noti.error('Hubo un problema al enviar. Intenta de nuevo.');
+      },
+    });
+  }
+
+  descargarContrato(): void {
+    if (!this.folio || this.descargando) return;
+    this.descargando = true;
+    this.cotizacionService.descargarContrato(this.folio).subscribe({
+      next: blob => {
+        this.descargando = false;
+        window.open(URL.createObjectURL(blob), '_blank');
+      },
+      error: () => {
+        this.descargando = false;
+        this.noti.error('No se pudo generar el contrato. Intenta de nuevo.');
       },
     });
   }

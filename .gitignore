@@ -4,6 +4,9 @@ backend_orquesta/**/obj/
 **/.vs/
 **/*.csproj.user
 
+# Contratos PDF generados en tiempo de ejecución (no son código fuente)
+backend_orquesta/**/Storage/
+
 # Frontend Angular (lo demás lo cubre frontend-orquesta/.gitignore)
 frontend-orquesta/node_modules/
 frontend-orquesta/dist/

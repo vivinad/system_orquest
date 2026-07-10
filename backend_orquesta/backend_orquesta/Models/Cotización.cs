@@ -17,6 +17,12 @@ namespace backend_orquesta.Models
         [Column("email_cliente")]
         public string? EmailCliente { get; set; }
 
+        [Column("dni_cliente")]
+        public string? DniCliente { get; set; }
+
+        [Column("direccion_cliente")]
+        public string? DireccionCliente { get; set; }
+
         [Column("paquete_id")]
         public int PaqueteId { get; set; }
 

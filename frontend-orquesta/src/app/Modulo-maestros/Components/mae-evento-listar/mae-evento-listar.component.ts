@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { SlicePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -17,7 +18,7 @@ import { Evento } from '../../Models/mae-catalogo.model';
   selector: 'mae-evento-listar',
   standalone: true,
   providers: [provideNativeDateAdapter()],
-  imports: [FormsModule, MatTableModule, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatDatepickerModule],
+  imports: [FormsModule, SlicePipe, MatTableModule, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatDatepickerModule],
   templateUrl: './mae-evento-listar.component.html',
   styleUrls: ['./mae-evento-listar.component.css'],
 })

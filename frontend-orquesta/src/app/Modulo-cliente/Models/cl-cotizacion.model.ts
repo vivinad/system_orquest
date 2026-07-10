@@ -8,6 +8,8 @@ export class CotizacionRequest {
   nombreCliente = '';
   telefonoCliente = '';
   emailCliente?: string;
+  dniCliente?: string;
+  direccionCliente?: string;
   paqueteId = 0;
   distritoId = 0;
   fechaEvento = '';        // 'YYYY-MM-DD'
@@ -45,6 +47,8 @@ export interface Cotizacion {
   nombreCliente: string;
   telefonoCliente: string;
   emailCliente?: string;
+  dniCliente?: string;
+  direccionCliente?: string;
   paqueteId: number;
   distritoId: number;
   fechaEvento: string;

@@ -24,20 +24,16 @@ export class ClHomeComponent implements OnInit, OnDestroy {
   fotoActual = 0;
   private timer?: ReturnType<typeof setInterval>;
 
-  // Próximos eventos (los gestiona el admin), agrupados por ubicación:
-  // los flyers de un mismo local rotan en carrusel y comparten mapa
+  // Próximos eventos (los gestiona el admin): un solo carrusel que avanza
+  // evento por evento; el mapa se mueve con cada uno porque su ubicación puede cambiar.
   eventos: Evento[] = [];
-  gruposEventos: { direccion: string; lugar: string; eventos: Evento[] }[] = [];
   private mapas = new Map<string, SafeResourceUrl>();
-
-  // Carrusel de flyers por grupo de eventos
-  eventoFotoActual = 0;
+  eventoIndex = 0;
 
   ngOnInit(): void {
     this.iniciarTimer();
     this.catalogoService.listarEventosVigentes().subscribe(e => {
       this.eventos = e;
-      this.agruparEventos();
     });
   }
   ngOnDestroy(): void {
@@ -48,45 +44,27 @@ export class ClHomeComponent implements OnInit, OnDestroy {
     clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.siguienteFoto();
-      this.eventoFotoActual++;
-    }, 4000);
+      this.siguienteEvento();
+    }, 6500);
   }
 
   siguienteFoto(): void {
     this.fotoActual = (this.fotoActual + 1) % this.fotos.length;
   }
-  // Navegación manual: cambia la foto y reinicia el contador automático
-  fotoManual(paso: number): void {
-    this.fotoActual = (this.fotoActual + paso + this.fotos.length) % this.fotos.length;
-    this.iniciarTimer();
-  }
-  irAFoto(i: number): void {
-    this.fotoActual = i;
-    this.iniciarTimer();
-  }
 
-  // Navegación manual del carrusel de flyers de eventos
-  eventoManual(paso: number): void {
-    this.eventoFotoActual += paso;
-    this.iniciarTimer();
-  }
-  // Índice positivo del flyer visible en un grupo (soporta retrocesos)
-  indiceEvento(g: { eventos: Evento[] }): number {
-    const len = g.eventos.length;
-    return ((this.eventoFotoActual % len) + len) % len;
-  }
-
-  private agruparEventos(): void {
-    const grupos = new Map<string, { direccion: string; lugar: string; eventos: Evento[] }>();
-    for (const e of this.eventos) {
-      let g = grupos.get(e.direccion);
-      if (!g) {
-        g = { direccion: e.direccion, lugar: e.lugar, eventos: [] };
-        grupos.set(e.direccion, g);
-      }
-      g.eventos.push(e);
+  private siguienteEvento(): void {
+    if (this.eventos.length > 0) {
+      this.eventoIndex = (this.eventoIndex + 1) % this.eventos.length;
     }
-    this.gruposEventos = [...grupos.values()];
+  }
+  // Navegación manual del carrusel de eventos: cambia de evento (foto + mapa) y reinicia el contador
+  eventoManual(paso: number): void {
+    if (this.eventos.length === 0) return;
+    this.eventoIndex = ((this.eventoIndex + paso) % this.eventos.length + this.eventos.length) % this.eventos.length;
+    this.iniciarTimer();
+  }
+  get eventoActual(): Evento | undefined {
+    return this.eventos[this.eventoIndex];
   }
 
   mapaDe(direccion: string): SafeResourceUrl {

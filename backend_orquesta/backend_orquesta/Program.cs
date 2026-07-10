@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using backend_orquesta.Data;
+using backend_orquesta.Services;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Base de datos (SQL Server — cadena en appsettings.json)
 builder.Services.AddDbContext<OrquestaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ContratoPdfService>();
 
 // CORS: permitir al frontend Angular consumir el API
 builder.Services.AddCors(options =>

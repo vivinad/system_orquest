@@ -13,10 +13,10 @@ mat-card { background: var(--ac-surface); border: 1px solid var(--ac-border); }
 .form h3 { margin-top: 0; }
 .form mat-form-field { margin-bottom: 6px; }
 
-/* Campos a la izquierda; mapa y flyer a la derecha */
+/* Título y flyer a todo el ancho; el resto de campos en parejas */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; align-items: start; }
-.form-grid .col { display: flex; flex-direction: column; }
 .form-grid mat-form-field { width: 100%; }
+.form-grid .ancho { grid-column: 1 / -1; }
 @media (max-width: 860px) { .form-grid { grid-template-columns: 1fr; } }
 .form mat-form-field.con-hint { margin-bottom: 20px; }
 .mapa-preview { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 14px; }

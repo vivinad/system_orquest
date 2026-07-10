@@ -77,6 +77,8 @@ CREATE TABLE Cotizacion (
     nombre_cliente      NVARCHAR(150)   NOT NULL,
     telefono_cliente    NVARCHAR(20)    NOT NULL,
     email_cliente       NVARCHAR(150)   NULL,
+    dni_cliente         NVARCHAR(20)    NULL,
+    direccion_cliente   NVARCHAR(300)   NULL,
     paquete_id          INT             NOT NULL REFERENCES Paquete(id),
     distrito_id         INT             NOT NULL REFERENCES Distrito(id),
     fecha_evento        DATE            NOT NULL,

@@ -13,55 +13,44 @@
 
 <!-- ===== Hero ===== -->
 <section id="inicio" class="hero">
-  <div class="glow glow-1"></div>
-  <div class="glow glow-3"></div>
+  <!-- Foto de fondo (carrusel automático), oscurecida para resaltar el texto -->
+  <div class="hero-fondo">
+    <div class="slider-track" [style.transform]="'translateX(-' + fotoActual * 100 + '%)'">
+      @for (f of fotos; track f) {
+        <img [src]="f" alt="Agrupación Agua Cristalina" class="foto-slide">
+      }
+    </div>
+    <div class="hero-overlay"></div>
+  </div>
 
   <div class="hero-grid">
     <div class="hero-content">
       <span class="badge">🌴 Amplio repertorio · Máncora — Piura</span>
       <h1 class="hero-titulo">
-        <span class="hero-nombre">Wendy</span>
-        <span class="hero-conector">y su</span>
+        <span class="hero-nombre">Wendy y su</span>
         <span class="texto-gradiente hero-agua">Agua Cristalina</span>
       </h1>
-      <p class="lema">
-        Somos una agrupación musical con un repertorio variado, capaz de adaptarnos a 
-        cualquier ambiente y ocasión. Fusionamos distintos géneros para llevar energía, 
-        sabor y emoción a cada presentación, ya sea en fiestas privadas, eventos sociales 
-        o celebraciones especiales. Con años de experiencia sobre el escenario, nuestro 
-        compromiso es hacer de cada evento un momento inolvidable, combinando talento, 
-        pasión y profesionalismo en cada nota.
-        ¡Déjanos ser parte de tu celebración!🎶💛
-      </p>
       <div class="hero-cta">
         <button matButton="filled" class="btn-gradiente extra-grande" routerLink="/cotizar">
-          <mat-icon>request_quote</mat-icon> Cotiza tu evento
+          <mat-icon>request_quote</mat-icon> Cotiza
         </button>
+        <a href="#eventos" matButton="outlined" class="extra-grande hero-vermas">
+          Ver más
+        </a>
       </div>
     </div>
 
-    <!-- Zona de fotos: carrusel automático -->
-    <div class="fotos-zona">
-      <div class="slider">
-        <div class="slider-track" [style.transform]="'translateX(-' + fotoActual * 100 + '%)'">
-          @for (f of fotos; track f) {
-            <img [src]="f" alt="Agrupación Agua Cristalina" class="foto-slide">
-          }
-        </div>
-        <button class="flecha izq" (click)="fotoManual(-1)" aria-label="Foto anterior">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <button class="flecha der" (click)="fotoManual(1)" aria-label="Foto siguiente">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
-      <div class="dots">
-        @for (f of fotos; track f; let i = $index) {
-          <button class="dot" [class.activo]="i === fotoActual" (click)="irAFoto(i)"
-                  [attr.aria-label]="'Ver foto ' + (i + 1)"></button>
-        }
-      </div>
-    </div>
+    <aside class="hero-lema-card">
+      <p class="lema">
+        Somos una agrupación musical con un repertorio variado, capaz de adaptarnos a
+        cualquier ambiente y ocasión. Fusionamos distintos géneros para llevar energía,
+        sabor y emoción a cada presentación, ya sea en fiestas privadas, eventos sociales
+        o celebraciones especiales. Con años de experiencia sobre el escenario, nuestro
+        compromiso es hacer de cada evento un momento inolvidable, combinando talento,
+        pasión y profesionalismo en cada nota.
+        ¡Déjanos ser parte de tu celebración!
+      </p>
+    </aside>
   </div>
   <a href="#eventos" class="scroll-down"><mat-icon>expand_more</mat-icon></a>
 </section>
@@ -73,40 +62,46 @@
       <h2 class="seccion-titulo">Próximos <span class="texto-gradiente">eventos</span></h2>
       <p class="seccion-sub">¡Ven a gozar con Agua Cristalina! Te esperamos en nuestros próximos shows.</p>
 
-      @for (g of gruposEventos; track g.direccion) {
-        <div class="evento">
-          <div class="evento-slider">
-            <div class="slider-track"
-                 [style.transform]="'translateX(-' + indiceEvento(g) * 100 + '%)'">
-              @for (e of g.eventos; track e.id) {
-                <figure class="evento-slide">
+      <div class="evento">
+        <div class="evento-slider">
+          <div class="slider-track" [style.transform]="'translateX(-' + eventoIndex * 100 + '%)'">
+            @for (e of eventos; track e.id) {
+              <figure class="evento-slide">
+                @if (e.imagenUrl) {
                   <img [src]="e.imagenUrl" class="foto-slide" [alt]="e.titulo">
-                  <figcaption class="evento-caption">
+                } @else {
+                  <div class="foto-slide sin-flyer">
                     <mat-icon>event</mat-icon>
-                    <span><strong>{{ e.titulo }}</strong> — {{ e.fechaTexto }}</span>
-                  </figcaption>
-                </figure>
-              }
-            </div>
-            @if (g.eventos.length > 1) {
-              <button class="flecha izq" (click)="eventoManual(-1)" aria-label="Flyer anterior">
-                <mat-icon>chevron_left</mat-icon>
-              </button>
-              <button class="flecha der" (click)="eventoManual(1)" aria-label="Flyer siguiente">
-                <mat-icon>chevron_right</mat-icon>
-              </button>
+                    <span>Sin flyer</span>
+                  </div>
+                }
+                <figcaption class="evento-caption">
+                  <mat-icon>event</mat-icon>
+                  <span><strong>{{ e.titulo }}</strong> — {{ e.fechaTexto }}</span>
+                </figcaption>
+              </figure>
             }
           </div>
+          @if (eventos.length > 1) {
+            <button class="flecha izq" (click)="eventoManual(-1)" aria-label="Evento anterior">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button class="flecha der" (click)="eventoManual(1)" aria-label="Evento siguiente">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          }
+        </div>
+        @if (eventoActual; as ev) {
           <div class="evento-mapa">
-            <iframe [src]="mapaDe(g.direccion)" loading="lazy" allowfullscreen
+            <iframe [src]="mapaDe(ev.direccion)" loading="lazy" allowfullscreen
                     referrerpolicy="no-referrer-when-downgrade" title="Ubicación del evento"></iframe>
             <p class="evento-dir">
               <mat-icon>location_on</mat-icon>
-              {{ g.lugar }} · {{ g.direccion }}
+              {{ ev.lugar }} · {{ ev.direccion }}
             </p>
           </div>
-        </div>
-      }
+        }
+      </div>
     </div>
   </section>
 }

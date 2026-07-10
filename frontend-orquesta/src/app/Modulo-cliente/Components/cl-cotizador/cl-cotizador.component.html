@@ -15,12 +15,18 @@
     <mat-icon class="check">check_circle</mat-icon>
     <h1>¡Cotización enviada!</h1>
     <p>Tu folio es <strong>#{{ folio }}</strong>. Nos pondremos en contacto contigo muy pronto.</p>
-    <a routerLink="/" matButton="outlined">Volver al inicio</a>
+    <div class="acciones-exito">
+      <button matButton="filled" class="btn-gradiente" [disabled]="descargando" (click)="descargarContrato()">
+        <mat-icon>description</mat-icon>
+        @if (descargando) { Generando… } @else { Descargar contrato }
+      </button>
+      <a routerLink="/" matButton="outlined">Volver al inicio</a>
+    </div>
   </div>
 } @else {
   <div class="layout">
     <div class="pasos">
-      <mat-stepper orientation="vertical" [linear]="true" #stepper>
+      <mat-stepper orientation="horizontal" [linear]="true" #stepper>
 
         <!-- Paso 1: ¿Cuántos integrantes? -->
         <mat-step label="¿Cuántos integrantes deseas?" [completed]="!!paqueteId">
@@ -51,10 +57,6 @@
               Elige una formación para habilitar los siguientes pasos.
             </p>
           }
-
-          <div class="acciones-paso">
-            <button matButton="filled" matStepperNext [disabled]="!paqueteId">Siguiente</button>
-          </div>
         </mat-step>
 
         <!-- Paso 2: Tu evento -->
@@ -100,7 +102,6 @@
 
           <div class="acciones-paso">
             <button matButton matStepperPrevious>Atrás</button>
-            <button matButton="filled" matStepperNext [disabled]="!datosEventoOk">Siguiente</button>
           </div>
         </mat-step>
 
@@ -108,44 +109,40 @@
         <mat-step label="Músicos y servicios extra" [completed]="true" optional>
           <h3>¿Agregar más músicos?</h3>
           <p class="sub">Cada músico se cobra una sola vez por el evento.</p>
-          <div class="musicos">
+          <div class="chips musicos">
             @for (m of musicos; track m.id) {
-              <div class="musico">
-                <mat-checkbox [checked]="(cantidades[m.id] || 0) > 0"
-                              (change)="toggleMusico(m, $event.checked)">
-                  {{ m.nombre }}
-                  <span class="badge" [class.viento]="m.tipo === 'viento'">{{ m.tipo }}</span>
-                  <span class="precio-mini">+{{ pen(m.precioAdicional) }}</span>
-                </mat-checkbox>
-                @if ((cantidades[m.id] || 0) > 0) {
-                  <mat-form-field appearance="outline" class="cant">
-                    <mat-label>Cant.</mat-label>
-                    <input matInput type="number" min="1" [ngModel]="cantidades[m.id]"
-                           (ngModelChange)="cambiarCantidad(m, $event)">
-                  </mat-form-field>
-                }
+              <div class="chip" [class.sel]="(cantidades[m.id] || 0) > 0"
+                   (click)="toggleMusico(m, !((cantidades[m.id] || 0) > 0))">
+                <mat-icon class="chip-check">
+                  {{ (cantidades[m.id] || 0) > 0 ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span class="chip-nombre">{{ m.nombre }}</span>
+                <span class="badge" [class.viento]="m.tipo === 'viento'">{{ m.tipo }}</span>
+                <span class="precio-mini">+{{ pen(m.precioAdicional) }}</span>
               </div>
             }
           </div>
 
           <h3 class="mt-3">Servicios adicionales</h3>
-          <div class="servicios">
+          <div class="chips servicios">
             @for (s of servicios; track s.id) {
-              <div class="servicio">
-                <mat-checkbox [checked]="serviciosSel[s.id]" (change)="toggleServicio(s, $event.checked)">
-                  {{ s.nombre }}
-                  @if (s.telefonoContacto) { <small>· WhatsApp {{ s.telefonoContacto }}</small> }
-                </mat-checkbox>
-                @if (esProyector(s) && serviciosSel[s.id]) {
-                  <p class="tip"><mat-icon>tips_and_updates</mat-icon> ¿Sabías que también ofrecemos edición de video? Márcala abajo.</p>
-                }
+              <div class="chip" [class.sel]="serviciosSel[s.id]" (click)="toggleServicio(s, !serviciosSel[s.id])">
+                <mat-icon class="chip-check">
+                  {{ serviciosSel[s.id] ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span class="chip-nombre">{{ s.nombre }}</span>
+                @if (s.telefonoContacto) { <small>· WhatsApp {{ s.telefonoContacto }}</small> }
               </div>
             }
           </div>
+          @for (s of servicios; track s.id) {
+            @if (esProyector(s) && serviciosSel[s.id]) {
+              <p class="tip"><mat-icon>tips_and_updates</mat-icon> ¿Sabías que también ofrecemos edición de video? Márcala abajo.</p>
+            }
+          }
 
           <div class="acciones-paso">
             <button matButton matStepperPrevious>Atrás</button>
-            <button matButton="filled" matStepperNext>Siguiente</button>
           </div>
         </mat-step>
 
@@ -165,6 +162,14 @@
               <mat-label>Correo (opcional)</mat-label>
               <input matInput type="email" [(ngModel)]="emailCliente">
             </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>DNI</mat-label>
+              <input matInput [(ngModel)]="dniCliente" required>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="ancho">
+              <mat-label>Dirección (para el contrato)</mat-label>
+              <input matInput [(ngModel)]="direccionCliente" required>
+            </mat-form-field>
             <mat-form-field appearance="outline" class="ancho">
               <mat-label>Observaciones (opcional)</mat-label>
               <textarea matInput rows="2" [(ngModel)]="observaciones"></textarea>
@@ -173,10 +178,6 @@
 
           <div class="acciones-paso">
             <button matButton matStepperPrevious>Atrás</button>
-            <button matButton="filled" class="btn-enviar"
-                    [disabled]="!datosEventoOk || !contactoOk || enviando" (click)="enviar()">
-              @if (enviando) { Enviando… } @else { Enviar cotización }
-            </button>
           </div>
         </mat-step>
       </mat-stepper>
@@ -184,6 +185,7 @@
 
     <!-- Resumen en vivo -->
     <aside class="resumen">
+     <div class="resumen-sticky">
       <mat-card>
         <h3><mat-icon>receipt_long</mat-icon> Resumen</h3>
 
@@ -247,6 +249,21 @@
           <div class="cargando"><mat-spinner diameter="28"></mat-spinner></div>
         }
       </mat-card>
+
+      <div class="resumen-acciones">
+        @if (stepper.selectedIndex < 3) {
+          <button matButton="filled" class="btn-siguiente"
+                  [disabled]="!puedeAvanzar(stepper.selectedIndex)" (click)="stepper.next()">
+            Siguiente paso
+          </button>
+        } @else {
+          <button matButton="filled" class="btn-siguiente btn-enviar"
+                  [disabled]="!datosEventoOk || !contactoOk || enviando" (click)="enviar()">
+            @if (enviando) { Enviando… } @else { Finalizar cotización }
+          </button>
+        }
+      </div>
+     </div>
     </aside>
   </div>
 }

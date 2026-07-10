@@ -11,7 +11,7 @@
       </ng-container>
       <ng-container matColumnDef="fecha">
         <th mat-header-cell *matHeaderCellDef>Vigente hasta</th>
-        <td mat-cell *matCellDef="let e">{{ e.fecha }}</td>
+        <td mat-cell *matCellDef="let e">{{ e.fecha | slice:0:10 }}</td>
       </ng-container>
       <ng-container matColumnDef="lugar">
         <th mat-header-cell *matHeaderCellDef>Lugar</th>
@@ -33,54 +33,52 @@
   <mat-card class="form">
     <h3>{{ editando.id ? 'Editar evento' : 'Nuevo evento' }}</h3>
     <div class="form-grid">
-      <div class="col">
-        <mat-form-field appearance="outline">
-          <mat-label>Título</mat-label>
-          <input matInput [(ngModel)]="editando.titulo">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha para el público</mat-label>
-          <input matInput [(ngModel)]="editando.fechaTexto">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="con-hint">
-          <mat-label>Último día del evento</mat-label>
-          <input matInput [matDatepicker]="picker" [(ngModel)]="fechaSel">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-hint>Luego de esta fecha ya no se muestra</mat-hint>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Lugar</mat-label>
-          <input matInput [(ngModel)]="editando.lugar">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Dirección (para el mapa)</mat-label>
-          <input matInput [(ngModel)]="editando.direccion" (ngModelChange)="direccionCambiada()">
-        </mat-form-field>
-      </div>
+      <mat-form-field appearance="outline" class="ancho">
+        <mat-label>Título</mat-label>
+        <input matInput [(ngModel)]="editando.titulo">
+      </mat-form-field>
 
-      <div class="col">
-        @if (mapaPreview) {
-          <div class="mapa-preview">
-            <iframe [src]="mapaPreview" loading="lazy" title="Vista previa de la ubicación"></iframe>
-            <small>Así se verá el mapa en la página principal — verifica que el marcador esté en el punto exacto.
-              💡 Tip: busca el local en Google Maps y copia la dirección tal como aparece ahí
-              (ej: <em>2VPW+CVG, Av. Paramonga, Lima</em>). También puedes hacer clic derecho sobre el punto
-              exacto en Google Maps y pegar las coordenadas aquí.</small>
-          </div>
-        }
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha para el público</mat-label>
+        <input matInput [(ngModel)]="editando.fechaTexto">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="con-hint">
+        <mat-label>Último día del evento</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="fechaSel">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-hint>Luego de esta fecha ya no se muestra</mat-hint>
+      </mat-form-field>
 
-        <div class="imagen-flyer">
-          <input type="file" accept="image/*" hidden #fileInput (change)="imagenSeleccionada($event)">
-          <button matButton="outlined" type="button" (click)="fileInput.click()">
-            <mat-icon>add_photo_alternate</mat-icon>
-            {{ editando.imagenUrl ? 'Cambiar imagen del flyer' : 'Subir imagen del flyer' }}
-          </button>
-          @if (editando.imagenUrl) {
-            <img [src]="editando.imagenUrl" alt="Vista previa del flyer" class="preview">
-          }
-          <small>Esta imagen se mostrará en la página principal, en próximos eventos.</small>
+      <mat-form-field appearance="outline">
+        <mat-label>Lugar</mat-label>
+        <input matInput [(ngModel)]="editando.lugar">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Dirección (para el mapa)</mat-label>
+        <input matInput [(ngModel)]="editando.direccion" (ngModelChange)="direccionCambiada()">
+      </mat-form-field>
+
+      @if (mapaPreview) {
+        <div class="mapa-preview ancho">
+          <iframe [src]="mapaPreview" loading="lazy" title="Vista previa de la ubicación"></iframe>
+          <small>Así se verá el mapa en la página principal — verifica que el marcador esté en el punto exacto.
+            💡 Tip: busca el local en Google Maps y copia la dirección tal como aparece ahí
+            (ej: <em>2VPW+CVG, Av. Paramonga, Lima</em>). También puedes hacer clic derecho sobre el punto
+            exacto en Google Maps y pegar las coordenadas aquí.</small>
         </div>
+      }
+
+      <div class="imagen-flyer ancho">
+        <input type="file" accept="image/*" hidden #fileInput (change)="imagenSeleccionada($event)">
+        <button matButton="outlined" type="button" (click)="fileInput.click()">
+          <mat-icon>add_photo_alternate</mat-icon>
+          {{ editando.imagenUrl ? 'Cambiar imagen del flyer' : 'Subir imagen del flyer' }}
+        </button>
+        @if (editando.imagenUrl) {
+          <img [src]="editando.imagenUrl" alt="Vista previa del flyer" class="preview">
+        }
+        <small>Esta imagen se mostrará en la página principal, en próximos eventos.</small>
       </div>
     </div>
 

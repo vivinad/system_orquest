@@ -69,6 +69,11 @@ export class ClCotizacionService {
     return this.http.put<void>(`${this.apiURL}/${id}/estado`, { estado, observaciones });
   }
 
+  /** Descarga el contrato PDF de una cotización ya creada. */
+  descargarContrato(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiURL}/${id}/contrato`, { responseType: 'blob' });
+  }
+
   contarPendientes(): Observable<number> {
     return environment.useMock
       ? of(MOCK_COTIZACIONES.filter(c => c.estado === 'pendiente').length).pipe(delay(100))

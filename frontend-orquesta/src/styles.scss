@@ -2,6 +2,7 @@
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
   @include mat.theme((
     color: (
       primary: mat.$magenta-palette,
@@ -72,6 +73,82 @@ body {
 
 /* SweetAlert2 en modo oscuro */
 .swal2-popup { background: var(--ac-surface) !important; color: var(--ac-text) !important; }
+
+/* ===== Barra de pasos horizontal (mat-stepper) con acento de marca ===== */
+.mat-horizontal-stepper-header-container {
+  padding: 10px 4px 22px;
+  overflow-x: auto;
+}
+.mat-step-header {
+  border-radius: 14px;
+  padding: 12px;
+}
+.mat-step-header:hover {
+  background: var(--ac-surface-2) !important;
+}
+.mat-step-icon {
+  width: 34px !important; height: 34px !important;
+  font-weight: 700;
+}
+.mat-step-icon-selected {
+  background-color: var(--ac-magenta) !important;
+  box-shadow: 0 6px 18px rgba(255, 46, 139, .45);
+}
+.mat-step-icon-state-done {
+  background-color: var(--ac-verde) !important;
+  color: #06210a !important;
+}
+.mat-step-label {
+  font-weight: 600 !important;
+}
+.mat-step-label.mat-step-label-selected {
+  color: var(--ac-magenta) !important;
+}
+.mat-stepper-horizontal-line {
+  border-top-color: var(--ac-border) !important;
+  margin: 0 -8px !important;
+}
+
+/* ===== Look moderno global: tarjetas y tablas ===== */
+.mat-mdc-card {
+  border-radius: 18px !important;
+  border: 1px solid var(--ac-border);
+  /* Sobre fondo casi negro una sombra negra no se nota: usamos un resplandor
+     sutil con los colores de marca para dar sensación de elevación. */
+  box-shadow:
+    0 22px 50px -26px rgba(255, 46, 139, .35),
+    0 10px 26px -14px rgba(92, 246, 74, .12) !important;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.mat-mdc-table {
+  background: transparent;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.mat-mdc-header-row {
+  background: var(--ac-surface-2);
+}
+.mat-mdc-header-cell {
+  font-weight: 700 !important;
+  color: var(--ac-text) !important;
+  letter-spacing: .2px;
+}
+.mat-mdc-row {
+  transition: background-color .12s;
+}
+.mat-mdc-row:hover {
+  background: var(--ac-surface-2);
+}
+.mat-mdc-row .mat-mdc-cell,
+.mat-mdc-header-row .mat-mdc-header-cell {
+  border-bottom-color: var(--ac-border) !important;
+}
+
+/* Campos de formulario con esquinas más suaves en toda la app */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-shape: 12px;
+}
 
 /* Desplegable de distritos (cotizador) */
 .panel-distritos {

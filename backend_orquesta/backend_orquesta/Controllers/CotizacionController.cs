@@ -2,21 +2,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend_orquesta.Data;
 using backend_orquesta.Models;
+using backend_orquesta.Services;
 
 namespace backend_orquesta.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class CotizacionController : ControllerBase
-    {
+    {                                                              
         private static readonly string[] DIAS =
             { "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado" };
 
         private readonly OrquestaDbContext _context;
+        private readonly ContratoPdfService _contratoPdfService;
+        private readonly IWebHostEnvironment _env;
 
-        public CotizacionController(OrquestaDbContext context)
+        public CotizacionController(OrquestaDbContext context, ContratoPdfService contratoPdfService, IWebHostEnvironment env)
         {
             _context = context;
+            _contratoPdfService = contratoPdfService;
+            _env = env;
         }
 
         // POST: api/cotizacion/calcular — previsualizar el precio (no guarda nada)
@@ -40,6 +45,8 @@ namespace backend_orquesta.Controllers
                 NombreCliente = req.NombreCliente,
                 TelefonoCliente = req.TelefonoCliente,
                 EmailCliente = req.EmailCliente,
+                DniCliente = req.DniCliente,
+                DireccionCliente = req.DireccionCliente,
                 PaqueteId = req.PaqueteId,
                 DistritoId = req.DistritoId,
                 FechaEvento = DateTime.Parse(req.FechaEvento),
@@ -103,6 +110,49 @@ namespace backend_orquesta.Controllers
 
             if (cotizacion == null) return NotFound();
             return cotizacion;
+        }
+
+        // GET: api/cotizacion/5/contrato — genera (o reutiliza) el contrato PDF de esa cotización
+        [HttpGet("{id}/contrato")]
+        public async Task<IActionResult> GetContrato(int id)
+        {
+            var cotizacion = await _context.Cotizaciones
+                .Include(c => c.Paquete)
+                .Include(c => c.Distrito)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (cotizacion == null) return NotFound();
+
+            var contratoExistente = await _context.ContratosPdf.FirstOrDefaultAsync(p => p.CotizacionId == id);
+            var rutaCompleta = contratoExistente != null
+                ? Path.Combine(_env.ContentRootPath, contratoExistente.RutaArchivo)
+                : null;
+
+            if (contratoExistente != null && System.IO.File.Exists(rutaCompleta))
+            {
+                var bytesGuardados = await System.IO.File.ReadAllBytesAsync(rutaCompleta!);
+                return File(bytesGuardados, "application/pdf", $"Contrato-{id}.pdf");
+            }
+
+            var pdfBytes = _contratoPdfService.Generar(cotizacion);
+
+            var rutaRelativa = Path.Combine("Storage", "Contratos", $"contrato-{id}.pdf");
+            var rutaAbsoluta = Path.Combine(_env.ContentRootPath, rutaRelativa);
+            Directory.CreateDirectory(Path.GetDirectoryName(rutaAbsoluta)!);
+            await System.IO.File.WriteAllBytesAsync(rutaAbsoluta, pdfBytes);
+
+            if (contratoExistente == null)
+            {
+                _context.ContratosPdf.Add(new ContratoPdf
+                {
+                    CotizacionId = id,
+                    RutaArchivo = rutaRelativa,
+                    FechaGeneracion = DateTime.Now,
+                });
+                await _context.SaveChangesAsync();
+            }
+
+            return File(pdfBytes, "application/pdf", $"Contrato-{id}.pdf");
         }
 
         // PUT: api/cotizacion/5/estado — el admin confirma/rechaza/marca pagada
@@ -184,6 +234,8 @@ namespace backend_orquesta.Controllers
         public string NombreCliente { get; set; } = string.Empty;
         public string TelefonoCliente { get; set; } = string.Empty;
         public string? EmailCliente { get; set; }
+        public string? DniCliente { get; set; }
+        public string? DireccionCliente { get; set; }
         public int PaqueteId { get; set; }
         public int DistritoId { get; set; }
         public string FechaEvento { get; set; } = string.Empty; // 'YYYY-MM-DD'
