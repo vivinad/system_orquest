@@ -56,6 +56,7 @@ export const routes: Routes = [
       },
       {
         path: 'contenido',
+        data: { miga: 'Contenido Web' },
         loadComponent: () =>
           import('./Modulo-maestros/Components/mae-media-listar/mae-media-listar.component').then(m => m.MaeMediaListarComponent),
       },

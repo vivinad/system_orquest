@@ -67,14 +67,18 @@ GO
 
 ## 2. Backend (.NET 8)
 
-1. Ajusta la cadena de conexión en `backend_orquesta/backend_orquesta/appsettings.json`
+El backend sigue la estructura en capas de PERÚ (ver `backend_orquesta/README.md`).
+
+1. Ejecuta `backend_orquesta/Data/Scripts/07_procedimientos_almacenados.sql` en la base `ORQUESTA`
+   (crea los procedimientos `usp_...` que usa la API).
+2. Ajusta la cadena de conexión `cn_bd_orquesta` en `backend_orquesta/WebApiOrquesta/appsettings.json`
    (`Server=...` debe apuntar a tu SQL Server).
-2. Corre:
+3. Corre:
    ```powershell
-   cd backend_orquesta\backend_orquesta
-   dotnet run
+   cd backend_orquesta
+   dotnet run --project WebApiOrquesta\WebApiOrquesta.csproj --launch-profile http
    ```
-3. En Swagger crea el primer admin:
+4. En Swagger crea el primer admin:
    `POST /api/auth/seed` → `{ "nombre":"Wendy", "email":"admin@aguacristalina.pe", "password":"tu_clave" }`
    (solo funciona si no existe ningún admin todavía).
 
@@ -92,5 +96,5 @@ En `frontend-orquesta/src/environments/environment.ts`:
 - `useMock: false` → consume el backend real.
 - Verifica que `url_api` apunte al puerto del backend (hoy `http://localhost:5161/api/`).
 
-> Nota: el backend permite CORS desde `http://localhost:4200`. Si corres el frontend en otro
-> puerto (4300) y usas `useMock: false`, agrega ese puerto en `Program.cs` (policy `AngularFrontend`).
+> Nota: el backend permite CORS desde `http://localhost:4200` y `http://localhost:4300`. Si corres el frontend en otro
+> puerto (4300) y usas `useMock: false`, agrega ese puerto en `Cors:OrigenesPermitidos` de `WebApiOrquesta/appsettings.json`.

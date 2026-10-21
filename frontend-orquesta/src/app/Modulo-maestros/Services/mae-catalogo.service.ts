@@ -74,6 +74,27 @@ export class MaeCatalogoService {
     return this.http.put<void>(this.apiURL + 'evento/' + e.id, e);
   }
 
+  /** Eventos quitados (para restaurarlos) — admin */
+  listarEventosOcultos(): Observable<Evento[]> {
+    return environment.useMock
+      ? of(MOCK_EVENTOS.filter(e => !e.activo)).pipe(delay(150))
+      : this.http.get<Evento[]>(this.apiURL + 'evento/ocultos');
+  }
+
+  /** Vuelve a publicar un evento quitado */
+  restaurarEvento(e: Evento): Observable<void> {
+    return this.actualizarEvento({ ...e, activo: true });
+  }
+
+  /** Guarda el nuevo orden de los videos o fotos (ids en el orden deseado) */
+  ordenarMedia(ids: number[]): Observable<void> {
+    if (environment.useMock) {
+      ids.forEach((id, i) => { const m = MOCK_MEDIA.find(x => x.id === id); if (m) m.orden = i + 1; });
+      return of(void 0).pipe(delay(100));
+    }
+    return this.http.put<void>(this.apiURL + 'mediahome/orden', { ids });
+  }
+
   eliminarEvento(id: number): Observable<void> {
     if (environment.useMock) {
       const i = MOCK_EVENTOS.findIndex(x => x.id === id);
@@ -128,6 +149,18 @@ export class MaeCatalogoService {
       return of(void 0).pipe(delay(150));
     }
     return this.http.put<void>(this.apiURL + 'paquete/' + p.id, p);
+  }
+
+  /** Paquetes ocultos (desactivados) para poder restaurarlos — admin */
+  listarPaquetesOcultos(): Observable<Paquete[]> {
+    return environment.useMock
+      ? of(MOCK_PAQUETES.filter(p => !p.activo)).pipe(delay(150))
+      : this.http.get<Paquete[]>(this.apiURL + 'paquete/ocultos');
+  }
+
+  /** Vuelve a mostrar un paquete oculto en la web y en el cotizador */
+  restaurarPaquete(p: Paquete): Observable<void> {
+    return this.actualizarPaquete({ ...p, activo: true });
   }
 
   eliminarPaquete(id: number): Observable<void> {

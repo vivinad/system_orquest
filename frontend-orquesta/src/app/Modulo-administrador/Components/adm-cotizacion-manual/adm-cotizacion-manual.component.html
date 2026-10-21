@@ -1,0 +1,188 @@
+<div class="adm-modal-fondo" (click)="cerrar.emit()">
+  <div class="adm-modal ancho adm-modal-brillo" role="dialog" aria-modal="true" aria-labelledby="titulo-manual" (click)="$event.stopPropagation()">
+    <div class="adm-modal-cab">
+      <div>
+        @if (esEdicion) {
+          <span class="adm-pill coral">COT-{{ editar!.id }}</span>
+          <h2 id="titulo-manual">Editar Cotización</h2>
+          <small>Al guardar se recalcula el precio y el contrato PDF sale con los datos nuevos.</small>
+        } @else {
+          <span class="adm-pill coral">Atención presencial</span>
+          <h2 id="titulo-manual">Nueva Cotización Manual</h2>
+          <small>Para clientes que contrataron en persona: queda registrada y puedes seguir su dinero en Finanzas.</small>
+        }
+      </div>
+      <button type="button" class="adm-modal-cerrar" (click)="cerrar.emit()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <div class="adm-modal-cuerpo cuerpo">
+      <div class="formulario">
+        <!-- Cliente -->
+        <p class="adm-seccion-titulo">Datos del cliente</p>
+        <div class="dos">
+          <label class="adm-campo ancho-total">
+            <span class="adm-label">Nombre completo *</span>
+            <span class="adm-control"><mat-icon>person</mat-icon><input type="text" maxlength="150" [(ngModel)]="nombreCliente" placeholder="Ej. María López Sánchez"></span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">Teléfono *</span>
+            <span class="adm-control"><mat-icon>call</mat-icon>
+              <input type="tel" inputmode="numeric" [ngModel]="telefonoCliente" (ngModelChange)="telefonoCliente = soloDigitos($event, 9)" placeholder="9 dígitos">
+            </span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">DNI</span>
+            <span class="adm-control"><mat-icon>badge</mat-icon>
+              <input type="text" inputmode="numeric" [ngModel]="dniCliente" (ngModelChange)="dniCliente = soloDigitos($event, 12)" placeholder="Opcional">
+            </span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">Correo</span>
+            <span class="adm-control"><mat-icon>mail</mat-icon><input type="email" maxlength="150" [(ngModel)]="emailCliente" placeholder="Opcional"></span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">Dirección del cliente</span>
+            <span class="adm-control"><mat-icon>home</mat-icon><input type="text" maxlength="255" [(ngModel)]="direccionCliente" placeholder="Opcional (sale en el contrato)"></span>
+          </label>
+        </div>
+
+        <!-- Evento -->
+        <p class="adm-seccion-titulo">Evento</p>
+        <div class="dos">
+          <label class="adm-campo">
+            <span class="adm-label">Tipo de evento</span>
+            <span class="adm-control">
+              <select [(ngModel)]="tipoEvento" (ngModelChange)="recalcular()">
+                <option value="">Seleccionar…</option>
+                @for (t of tiposEvento; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+            </span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">Fecha del evento *</span>
+            <span class="adm-control"><input type="date" [(ngModel)]="fechaEvento" (ngModelChange)="recalcular()"></span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">Hora de inicio</span>
+            <span class="adm-control"><input type="time" [(ngModel)]="horaInicio"></span>
+          </label>
+          <div class="adm-campo">
+            <span class="adm-label">Horas de show</span>
+            <div class="stepper">
+              <button type="button" (click)="paso(-1)" aria-label="Menos">–</button>
+              <b>{{ horas }} <small>hrs</small></b>
+              <button type="button" (click)="paso(1)" aria-label="Más">+</button>
+            </div>
+          </div>
+          <label class="adm-campo">
+            <span class="adm-label">Paquete *</span>
+            <span class="adm-control">
+              <select [(ngModel)]="paqueteId" (ngModelChange)="recalcular()">
+                <option [ngValue]="null">Seleccionar…</option>
+                @for (p of paquetes; track p.id) { <option [ngValue]="p.id">{{ p.nombre }} — S/ {{ monto(p.precioBase, 0) }}</option> }
+              </select>
+            </span>
+          </label>
+          <label class="adm-campo">
+            <span class="adm-label">Distrito *</span>
+            <span class="adm-control">
+              <select [(ngModel)]="distritoId" (ngModelChange)="recalcular()">
+                <option [ngValue]="null">Seleccionar…</option>
+                @for (d of distritos; track d.id) { <option [ngValue]="d.id">{{ d.nombre }}</option> }
+              </select>
+            </span>
+          </label>
+          <label class="adm-campo ancho-total">
+            <span class="adm-label">Dirección del local</span>
+            <span class="adm-control"><mat-icon>location_on</mat-icon><input type="text" maxlength="255" [(ngModel)]="direccionEvento" placeholder="Ej. Av. Larco 123, Miraflores"></span>
+          </label>
+        </div>
+
+        @if (musicos.length) {
+          <p class="adm-seccion-titulo">Músicos adicionales</p>
+          <div class="musicos">
+            @for (m of musicos; track m.id) {
+              <div class="musico">
+                <span><strong>{{ m.nombre }}</strong><small>+ S/ {{ monto(m.precioAdicional, 0) }} c/u</small></span>
+                <span class="mini-stepper">
+                  <button type="button" (click)="pasoMusico(m.id, -1)" aria-label="Menos">–</button>
+                  <b>{{ cantidades[m.id] || 0 }}</b>
+                  <button type="button" (click)="pasoMusico(m.id, 1)" aria-label="Más">+</button>
+                </span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (servicios.length) {
+          <p class="adm-seccion-titulo">Servicios extra</p>
+          <div class="servicios">
+            @for (s of servicios; track s.id) {
+              <button type="button" [class.activo]="serviciosSel[s.id]" (click)="alternarServicio(s.id)">
+                <mat-icon>{{ serviciosSel[s.id] ? 'check_circle' : 'add_circle_outline' }}</mat-icon>{{ s.nombre }}
+              </button>
+            }
+          </div>
+        }
+
+        <label class="adm-campo">
+          <span class="adm-label">Observaciones</span>
+          <span class="adm-control"><textarea rows="2" maxlength="500" [(ngModel)]="observaciones" placeholder="Acuerdos con el cliente, repertorio, etc."></textarea></span>
+        </label>
+      </div>
+
+      <!-- Resumen y pago -->
+      <aside class="resumen">
+        <p class="adm-seccion-titulo">Resumen</p>
+        <div class="total">
+          <span>{{ esEdicion && montoAcordado ? 'Total calculado' : 'Total cotizado' }}</span>
+          <strong [class.tachado]="esEdicion && montoAcordado"><small>S/</small>{{ monto(total) }}</strong>
+          @if (calculando) { <em>Calculando…</em> }
+          @else if (!puedeCalcular) { <em>Elige paquete, distrito y fecha</em> }
+        </div>
+        @if (resultado) {
+          <ul class="desglose">
+            <li><span>Paquete ({{ horas }} h)</span><b>S/ {{ monto(resultado.costoPaquete) }}</b></li>
+            @if (resultado.costoMusicosExtra) { <li><span>Músicos adicionales</span><b>S/ {{ monto(resultado.costoMusicosExtra) }}</b></li> }
+            <li><span>Movilidad</span><b>S/ {{ monto(resultado.costoMovilidad) }}</b></li>
+            <li><span>Día</span><b>{{ resultado.diaSemana }}</b></li>
+          </ul>
+          @if (resultado.tieneATratar) {
+            <p class="aviso"><mat-icon>info</mat-icon>{{ resultado.motivoATratar }}</p>
+          }
+        }
+
+        @if (esEdicion) {
+          <p class="adm-seccion-titulo">Monto acordado</p>
+          <label class="adm-campo">
+            <span class="recibido"><span>S/</span><input type="number" min="0" step="0.01" [(ngModel)]="montoAcordado" placeholder="Opcional"></span>
+            <span class="adm-ayuda">Escribe aquí el precio final que acordaste con el cliente por WhatsApp (por lo que estaba "a tratar"). Si lo dejas vacío se usa el total calculado.</span>
+          </label>
+          <div class="saldo"><span>Total que se guardará</span><b class="txt-verde">S/ {{ monto(totalFinal) }}</b></div>
+        } @else {
+        <p class="adm-seccion-titulo">Estado y pago</p>
+          <div class="estados">
+            <button type="button" [class.activo]="estado === 'pendiente'" (click)="estado = 'pendiente'">Pendiente</button>
+            <button type="button" [class.activo]="estado === 'confirmada'" (click)="estado = 'confirmada'">Confirmada</button>
+            <button type="button" [class.activo]="estado === 'pagada'" (click)="marcarPagada()">Pagada</button>
+          </div>
+          <label class="adm-campo">
+            <span class="adm-label">Monto recibido hoy</span>
+            <span class="recibido"><span>S/</span><input type="number" min="0" step="0.01" [(ngModel)]="adelanto" placeholder="0.00"></span>
+            <span class="adm-ayuda">Si recibiste un adelanto, se registra como ingreso en Finanzas vinculado a esta cotización.</span>
+          </label>
+          @if (total > 0 && (adelanto || 0) > 0) {
+            <div class="saldo"><span>Saldo por cobrar</span><b [class.txt-verde]="saldo === 0">S/ {{ monto(saldo) }}</b></div>
+          }
+        }
+      </aside>
+    </div>
+
+    <div class="adm-modal-pie">
+      <button type="button" class="adm-btn-sec" (click)="cerrar.emit()">Cancelar</button>
+      <button type="button" class="adm-btn" (click)="guardar()" [disabled]="guardando">
+        <mat-icon>save</mat-icon> {{ guardando ? 'Guardando…' : (esEdicion ? 'Guardar cambios' : 'Guardar cotización') }}
+      </button>
+    </div>
+  </div>
+</div>

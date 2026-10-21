@@ -33,6 +33,11 @@ export interface Evento {
   direccion: string; // dirección para el mapa de Google
   imagenUrl: string; // nombre de archivo del flyer, ej: 'evento1.png'
   activo: boolean;
+  // Opcionales: se muestran en la cartelera de la página principal
+  categoria?: string;   // ej: 'Fiesta patronal', 'Festival playero'
+  horario?: string;     // ej: '1:00 P.M. a 6:00 P.M.'
+  descripcion?: string;
+  servicios?: string;   // separados por coma: 'Almuerzos y ceviches, Estacionamiento'
 }
 
 /** Video de YouTube o foto de portada que se muestra en el home */

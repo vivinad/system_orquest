@@ -1,70 +1,265 @@
-<h1>Finanzas</h1>
-
-<div class="kpis">
-  <mat-card class="kpi"><span class="label">Ingresos</span><span class="valor ing">{{ pen(resumen?.ingresos) }}</span></mat-card>
-  <mat-card class="kpi"><span class="label">Gastos</span><span class="valor gas">{{ pen(resumen?.gastos) }}</span></mat-card>
-  <mat-card class="kpi"><span class="label">Balance</span><span class="valor bal">{{ pen(resumen?.balance) }}</span></mat-card>
-</div>
-
-<div class="grid">
-  <mat-card class="panel">
-    <table mat-table [dataSource]="lista" class="tabla">
-      <ng-container matColumnDef="fecha">
-        <th mat-header-cell *matHeaderCellDef>Fecha</th>
-        <td mat-cell *matCellDef="let f">{{ f.fecha | slice:0:10 }}</td>
-      </ng-container>
-      <ng-container matColumnDef="descripcion">
-        <th mat-header-cell *matHeaderCellDef>Descripción</th>
-        <td mat-cell *matCellDef="let f">{{ f.descripcion }}<br><small>{{ f.categoria }}</small></td>
-      </ng-container>
-      <ng-container matColumnDef="tipo">
-        <th mat-header-cell *matHeaderCellDef>Tipo</th>
-        <td mat-cell *matCellDef="let f"><span class="chip" [class.gasto]="f.tipo === 'gasto'">{{ f.tipo }}</span></td>
-      </ng-container>
-      <ng-container matColumnDef="monto">
-        <th mat-header-cell *matHeaderCellDef>Monto</th>
-        <td mat-cell *matCellDef="let f" [class.rojo]="f.tipo === 'gasto'">
-          {{ f.tipo === 'gasto' ? '-' : '+' }}{{ pen(f.monto) }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let f">
-          <button matIconButton (click)="editar(f)" title="Editar"><mat-icon>edit</mat-icon></button>
-          <button matIconButton (click)="eliminar(f)" title="Eliminar"><mat-icon>delete</mat-icon></button>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-      <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
-    </table>
-  </mat-card>
-
-  <mat-card class="form">
-    <h3>{{ editando.id ? 'Editar movimiento' : 'Registrar movimiento' }}</h3>
-    <mat-form-field appearance="outline">
-      <mat-label>Tipo</mat-label>
-      <mat-select [(ngModel)]="editando.tipo">
-        <mat-option value="ingreso">Ingreso</mat-option>
-        <mat-option value="gasto">Gasto</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Descripción</mat-label>
-      <input matInput [(ngModel)]="editando.descripcion">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Categoría</mat-label>
-      <input matInput [(ngModel)]="editando.categoria">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Monto (S/)</mat-label>
-      <input matInput type="number" min="0" [(ngModel)]="editando.monto">
-    </mat-form-field>
-    <div class="acciones">
-      <button matButton="filled" class="btn-gradiente" (click)="guardar()">
-        {{ editando.id ? 'Guardar cambios' : 'Agregar' }}
-      </button>
-      @if (editando.id) { <button matButton (click)="limpiar()">Cancelar</button> }
+<div class="adm-pagina">
+  <header class="adm-cabecera">
+    <div>
+      <span class="adm-kicker"><span class="adm-punto punto-rojo"></span> Tesorería • Temporada {{ anio }}</span>
+      <h1>Finanzas y Flujo de Caja</h1>
+      <p>Monitorea liquidaciones de presentaciones, pagos a músicos y saldos de contratación en tiempo real.</p>
     </div>
-  </mat-card>
+    <div class="adm-cabecera-acciones">
+      <button type="button" class="adm-btn-sec" (click)="exportar()" [disabled]="!filtrados.length">
+        <mat-icon>download</mat-icon> Exportar Reporte
+      </button>
+      <button type="button" class="adm-btn" (click)="abrirNuevo()">
+        <mat-icon>add_circle_outline</mat-icon> Registrar Movimiento
+      </button>
+    </div>
+  </header>
+
+  <!-- KPIs -->
+  <section class="adm-kpis kpis">
+    <article class="adm-tarjeta kpi">
+      <div class="kpi-top">
+        <span class="adm-icono tono-verde"><mat-icon>trending_up</mat-icon></span>
+        <span class="kpi-label">Ingresos<br>Totales</span>
+        @let vi = variacionIngresos;
+        @if (vi !== null) {
+          <span class="adm-chip" [class.tono-verde]="vi >= 0" [class.tono-rosa]="vi < 0">
+            <mat-icon>{{ vi >= 0 ? 'north' : 'south' }}</mat-icon>{{ vi >= 0 ? '+' : '' }}{{ vi }}% este mes
+          </span>
+        }
+      </div>
+      <div class="kpi-valor"><small class="txt-verde">s/</small>{{ monto(ingresos) }}</div>
+      <div class="kpi-filas">
+        <span>{{ cobradoContratos.contratos }} {{ cobradoContratos.contratos === 1 ? 'contrato vinculado' : 'contratos vinculados' }}</span>
+        <span class="txt-verde">Cobrado: {{ cobradoContratos.pct }}%</span>
+      </div>
+      <div class="kpi-barra verde"><span [style.width.%]="cobradoContratos.pct"></span></div>
+    </article>
+
+    <article class="adm-tarjeta kpi">
+      <div class="kpi-top">
+        <span class="adm-icono cuadrado tono-dorado"><mat-icon>payments</mat-icon></span>
+        <span class="kpi-label">Gastos<br>Operativos</span>
+        @if (ingresos > 0) { <span class="adm-chip tono-dorado">{{ pctGastos }}% del ingreso</span> }
+      </div>
+      <div class="kpi-valor"><small class="txt-dorado">s/</small>{{ monto(gastos) }}</div>
+      <div class="kpi-desglose">
+        @for (g of topGastos; track g.categoria) {
+          <span><span>{{ g.categoria }}</span><b>S/ {{ monto(g.monto, 0) }}</b></span>
+        } @empty {
+          <span><span>Sin gastos en el periodo</span></span>
+        }
+      </div>
+    </article>
+
+    <article class="adm-tarjeta kpi destacada">
+      <div class="kpi-top">
+        <span class="adm-icono cuadrado tono-rosa"><mat-icon>account_balance</mat-icon></span>
+        <span class="kpi-label una">Balance Neto Libre</span>
+        <span class="punto-vivo"></span>
+      </div>
+      <div class="kpi-valor"><small class="txt-rosa">s/</small>{{ monto(balance) }}</div>
+      <div class="kpi-filas">
+        <span>Margen Operativo Bruto</span>
+        <b class="txt-rosa">{{ margen }}%</b>
+      </div>
+      <div class="kpi-barra rosa"><span [style.width.%]="margen < 0 ? 0 : margen > 100 ? 100 : margen"></span></div>
+    </article>
+
+    <article class="adm-tarjeta kpi">
+      <div class="kpi-top">
+        <span class="adm-icono cuadrado tono-gris"><mat-icon>pending_actions</mat-icon></span>
+        <span class="kpi-label">Por Cobrar /<br>Pendientes</span>
+        <span class="adm-chip tono-gris">{{ porCobrar.eventos }} {{ porCobrar.eventos === 1 ? 'evento' : 'eventos' }}</span>
+      </div>
+      <div class="kpi-valor"><small>s/</small>{{ monto(porCobrar.monto) }}</div>
+      @if (proximoCobro; as c) {
+        <div class="kpi-filas">
+          <span>Próximo cobro</span>
+          <span class="txt-dorado">{{ c.nombreCliente }} ({{ fechaDiaMes(c.fechaEvento) }})</span>
+        </div>
+      }
+      <span class="kpi-check"><mat-icon>check_circle</mat-icon> Saldos de cotizaciones con contrato</span>
+    </article>
+  </section>
+
+  <div class="rejilla">
+    <div class="columna">
+      <!-- Historial -->
+      <section class="adm-tarjeta historial">
+        <div class="adm-tarjeta-cabecera">
+          <div class="titulo-acento">
+            <h2>Historial de Movimientos</h2>
+            <small>Ingresos y gastos registrados en el periodo</small>
+          </div>
+          <div class="adm-tabs tabs-caja">
+            <button type="button" class="adm-tab coral" [class.activo]="pestana === 'todos'" (click)="pestana = 'todos'; cambiarFiltro()">Todos ({{ contarTipo('todos') }})</button>
+            <button type="button" class="adm-tab coral" [class.activo]="pestana === 'ingreso'" (click)="pestana = 'ingreso'; cambiarFiltro()">Ingresos</button>
+            <button type="button" class="adm-tab coral" [class.activo]="pestana === 'gasto'" (click)="pestana = 'gasto'; cambiarFiltro()">Gastos</button>
+          </div>
+        </div>
+
+        <div class="herramientas">
+          <label class="adm-control buscador">
+            <mat-icon>search</mat-icon>
+            <input type="search" [(ngModel)]="busqueda" (ngModelChange)="cambiarFiltro()" placeholder="Buscar por cliente, categoría o detalle">
+          </label>
+          <label class="adm-control periodo">
+            <mat-icon>calendar_month</mat-icon>
+            <select [(ngModel)]="mes" (ngModelChange)="cambiarFiltro()" aria-label="Periodo">
+              @for (m of meses; track m) { <option [value]="m">{{ nombreMesTitulo(m) }} • Temporada {{ m.slice(0, 4) }}</option> }
+              <option value="">Todo el historial</option>
+            </select>
+          </label>
+          <button type="button" class="excel" (click)="exportar()" [disabled]="!filtrados.length"><mat-icon>grid_on</mat-icon> Excel</button>
+        </div>
+
+        <ul class="movimientos">
+          @for (f of paginaActual; track f.id) {
+            <li class="movimiento" [class.seleccionado]="editando.id === f.id">
+              <span class="mov-icono" [class.ingreso]="f.tipo === 'ingreso'" [class.gasto]="f.tipo === 'gasto'">
+                <mat-icon>{{ iconoDe(f) }}</mat-icon>
+              </span>
+              <div class="mov-info">
+                <div class="mov-titulo">
+                  <strong>{{ f.descripcion }}</strong>
+                  @if (f.tipo === 'ingreso') {
+                    <span class="adm-chip cuadrado tono-verde">{{ f.categoria || 'Ingreso' }}</span>
+                  } @else {
+                    <span class="adm-chip cuadrado solido tono-dorado">{{ f.categoria || 'Gasto' }}</span>
+                  }
+                </div>
+                @if (paqueteDe(f.cotizacionId)) { <span class="adm-chip cuadrado tono-gris sub">{{ paqueteDe(f.cotizacionId) }}</span> }
+                <div class="mov-meta">
+                  <span><mat-icon>calendar_today</mat-icon>{{ fechaMedia(f.fecha) }}</span>
+                  @if (f.cotizacionId) {
+                    <span class="sep">•</span>
+                    <span><mat-icon>link</mat-icon>COT-{{ f.cotizacionId }}</span>
+                    @if (clienteDe(f.cotizacionId)) { <span class="sep">•</span><span class="txt-verde">{{ clienteDe(f.cotizacionId) }}</span> }
+                  }
+                </div>
+              </div>
+              <div class="mov-monto" [class.txt-verde]="f.tipo === 'ingreso'" [class.txt-dorado]="f.tipo === 'gasto'">
+                <strong>{{ f.tipo === 'ingreso' ? '+' : '-' }} S/ {{ monto(f.monto) }}</strong>
+                <span class="mov-acciones">
+                  <button type="button" class="adm-btn-icono" (click)="editar(f)" matTooltip="Editar"><mat-icon>edit</mat-icon></button>
+                  <button type="button" class="adm-btn-icono peligro" (click)="eliminar(f)" matTooltip="Eliminar"><mat-icon>delete</mat-icon></button>
+                </span>
+              </div>
+            </li>
+          } @empty {
+            <li class="adm-vacio">{{ cargando ? 'Cargando…' : 'No hay movimientos en este periodo.' }}</li>
+          }
+        </ul>
+
+        <div class="paginacion">
+          <span>Mostrando {{ paginaActual.length }} de {{ filtrados.length }} movimientos registrados{{ mes ? ' en ' + nombreMesTitulo(mes).split(' ')[0] : '' }}</span>
+          @if (totalPaginas > 1) {
+            <span class="paginas">
+              <button type="button" [disabled]="pagina <= 1" (click)="pagina = pagina - 1">Anterior</button>
+              @for (p of paginas; track p) {
+                <button type="button" class="num" [class.activo]="p === pagina" (click)="pagina = p">{{ p }}</button>
+              }
+              <button type="button" [disabled]="pagina >= totalPaginas" (click)="pagina = pagina + 1">Siguiente</button>
+            </span>
+          }
+        </div>
+      </section>
+    </div>
+
 </div>
+</div>
+
+<!-- Modal: registrar / editar movimiento -->
+@if (modalAbierto) {
+  <div class="adm-modal-fondo" (click)="cerrarModal()">
+    <section class="adm-modal adm-modal-brillo registrar formulario" role="dialog" aria-modal="true" aria-labelledby="titulo-mov" (click)="$event.stopPropagation()">
+      <div class="adm-modal-cab">
+        <div>
+          <h2 id="titulo-mov">{{ editando.id ? 'Editar Movimiento' : 'Registrar Movimiento' }}</h2>
+          <small>Entrada de caja directa al libro diario</small>
+        </div>
+        <button type="button" class="adm-modal-cerrar" (click)="cerrarModal()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="adm-modal-cuerpo columnas">
+        <div class="modal-col">
+        <div class="adm-campo">
+          <span class="adm-label">Tipo de registro</span>
+          <div class="tipo-toggle">
+            <button type="button" [class.activo-ingreso]="editando.tipo === 'ingreso'" (click)="cambiarTipo('ingreso')">
+              <mat-icon>add_circle_outline</mat-icon> + Ingreso
+            </button>
+            <button type="button" [class.activo-gasto]="editando.tipo === 'gasto'" (click)="cambiarTipo('gasto')">
+              <mat-icon>remove_circle_outline</mat-icon> - Gasto
+            </button>
+          </div>
+        </div>
+
+        <div class="adm-campo">
+          <span class="fila-label"><span class="adm-label">Monto</span><span class="moneda-txt">Moneda: Soles (PEN)</span></span>
+          <label class="monto">
+            <span class="moneda">S/</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="editando.monto" placeholder="0.00">
+          </label>
+          <div class="rapidos">
+            @for (n of [100, 500, 1000]; track n) {
+              <button type="button" (click)="sumar(n)">+ S/ {{ n === 1000 ? '1,000' : n }}</button>
+            }
+          </div>
+        </div>
+
+        </div>
+        <div class="modal-col">
+        <div class="adm-campo">
+          <span class="adm-label">Categoría del movimiento</span>
+          <div class="categorias">
+            @for (c of categorias[editando.tipo || 'ingreso']; track c.texto) {
+              <button type="button" [class.activo]="editando.categoria === c.texto" (click)="elegirCategoria(c.texto)">{{ c.texto }}</button>
+            }
+          </div>
+        </div>
+
+        <label class="adm-campo">
+          <span class="adm-label">Descripción detallada</span>
+          <span class="adm-control">
+            <input type="text" maxlength="255" [(ngModel)]="editando.descripcion" placeholder="Ej. Pago de saldo fiesta privada Punta Sal">
+          </span>
+        </label>
+
+        <div class="dos">
+          @if (editando.tipo === 'ingreso') {
+            <label class="adm-campo">
+              <span class="adm-label">Vincular a evento cotizado</span>
+              <span class="adm-control">
+                <select [(ngModel)]="editando.cotizacionId">
+                  <option [ngValue]="undefined">-- Sin vincular (ingreso libre)</option>
+                  @for (c of cotizacionesVinculables; track c.id) {
+                    <option [ngValue]="c.id">COT-{{ c.id }} · {{ c.nombreCliente }}</option>
+                  }
+                </select>
+              </span>
+            </label>
+          }
+          <label class="adm-campo">
+            <span class="adm-label">Fecha</span>
+            <span class="adm-control"><input type="date" [(ngModel)]="editando.fecha"></span>
+          </label>
+        </div>
+
+        </div>
+        <div class="consejo-modal">
+          <mat-icon>info</mat-icon>
+          <span><strong>Consejo de Caja:</strong> Recuerda solicitar el comprobante físico o PDF para cualquier gasto superior a <strong>S/ 200.00</strong>.</span>
+        </div>
+      </div>
+
+      <div class="adm-modal-pie pie">
+        <button type="button" class="adm-btn-sec" (click)="cerrarModal()">Cancelar</button>
+        <button type="button" class="adm-btn grande" (click)="guardar()" [disabled]="guardando">
+          <mat-icon>save</mat-icon> {{ editando.id ? 'Guardar Cambios' : 'Guardar Movimiento' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

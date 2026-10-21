@@ -50,6 +50,8 @@ export const MOCK_EVENTOS: Evento[] = [
     direccion: 'Av. José Saco Rojas, Carabayllo, Lima',
     imagenUrl: 'evento1.png',
     activo: true,
+    categoria: 'Fiestas Patrias',
+    horario: 'Desde la 1:00 P.M.',
   },
   {
     id: 2,
@@ -60,6 +62,8 @@ export const MOCK_EVENTOS: Evento[] = [
     direccion: 'Av. José Saco Rojas, Carabayllo, Lima',
     imagenUrl: 'evento2.png',
     activo: true,
+    categoria: 'Todos los domingos',
+    horario: '1:00 P.M. a 6:00 P.M.',
   },
 ];
 

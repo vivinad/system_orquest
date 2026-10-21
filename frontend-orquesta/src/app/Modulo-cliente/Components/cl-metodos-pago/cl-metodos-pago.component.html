@@ -1,8 +1,11 @@
-<div class="metodos">
-  <span class="metodos-titulo">Aceptamos estos medios de pago</span>
-  <div class="metodos-logos">
+<section class="metodos">
+  <h2 class="metodos-titulo">Aceptamos estos medios de pago</h2>
+  <ul class="metodos-lista">
     @for (m of metodos; track m.imagen) {
-      <img [src]="m.imagen" [alt]="'Pago con ' + m.nombre" [title]="m.nombre">
+      <li class="metodo" [title]="m.nombre">
+        <img [src]="m.imagen" [alt]="'Pago con ' + m.nombre">
+        <span>{{ m.detalle }}</span>
+      </li>
     }
-  </div>
-</div>
+  </ul>
+</section>

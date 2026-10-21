@@ -70,6 +70,16 @@ export interface Cotizacion {
   motivoATratar?: string;
   observaciones?: string;
   fechaCreacion: string;
-  paquete?: { id: number; nombre: string };
+  /** Clave para descargar el contrato (la devuelve el backend al crear la cotización) */
+  codigoAcceso?: string;
+  paquete?: { id: number; nombre: string; numIntegrantes?: number };
   distrito?: { id: number; nombre: string };
+  /** Músicos adicionales y servicios extra elegidos */
+  musicos?: { musicoId: number; cantidad: number; precioAplicado: number }[];
+  extras?: { servicioId: number }[];
+}
+
+/** Lo que envía el admin al editar: los mismos datos + el monto acordado (opcional) */
+export interface CotizacionEdicion extends CotizacionRequest {
+  montoAcordado?: number;
 }

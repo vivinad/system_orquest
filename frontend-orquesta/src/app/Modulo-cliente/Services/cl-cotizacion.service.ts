@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of, delay, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import {
-  CotizacionRequest, CotizacionResultado, Cotizacion, MusicoDetalle,
+  CotizacionRequest, CotizacionResultado, Cotizacion, MusicoDetalle, CotizacionEdicion,
 } from '../Models/cl-cotizacion.model';
 import {
   MOCK_PAQUETES, MOCK_DISTRITOS, MOCK_MUSICOS, MOCK_SERVICIOS,
@@ -72,6 +72,23 @@ export class ClCotizacionService {
     return this.http.get<Cotizacion[]>(url);
   }
 
+  /** Edita los datos de una cotización y/o fija el monto acordado (admin) */
+  actualizar(id: number, req: CotizacionEdicion): Observable<Cotizacion> {
+    if (environment.useMock) {
+      const c = MOCK_COTIZACIONES.find(x => x.id === id);
+      if (!c) throw new Error('No existe');
+      const r = this.calcularLocal(req);
+      Object.assign(c, {
+        ...req, diaSemana: r.diaSemana, costoPaquete: r.costoPaquete, costoMusicosExtra: r.costoMusicosExtra,
+        costoMovilidad: r.costoMovilidad, subtotal: r.subtotal,
+        total: req.montoAcordado ?? r.total,
+        tieneATratar: req.montoAcordado ? false : r.tieneATratar, motivoATratar: r.motivoATratar,
+      });
+      return of({ ...c }).pipe(delay(150));
+    }
+    return this.http.put<Cotizacion>(`${this.apiURL}/${id}`, req);
+  }
+
   cambiarEstado(id: number, estado: string, observaciones?: string): Observable<void> {
     if (environment.useMock) {
       const c = MOCK_COTIZACIONES.find(x => x.id === id);
@@ -81,9 +98,15 @@ export class ClCotizacionService {
     return this.http.put<void>(`${this.apiURL}/${id}/estado`, { estado, observaciones });
   }
 
-  /** Descarga el contrato PDF de una cotización ya creada. */
-  descargarContrato(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiURL}/${id}/contrato`, { responseType: 'blob' });
+  /**
+   * Descarga el contrato PDF de una cotización ya creada.
+   * El cliente envía el código de acceso que recibió al crearla; el admin (con sesión) no lo necesita.
+   */
+  descargarContrato(id: number, codigoAcceso?: string): Observable<Blob> {
+    const url = codigoAcceso
+      ? `${this.apiURL}/${id}/contrato?codigo=${encodeURIComponent(codigoAcceso)}`
+      : `${this.apiURL}/${id}/contrato`;
+    return this.http.get(url, { responseType: 'blob' });
   }
 
   contarPendientes(): Observable<number> {

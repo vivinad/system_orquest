@@ -1,0 +1,33 @@
+:host { display: contents; }
+
+.detalle { max-width: 900px; }
+.cab-chips { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.bloque { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; background: var(--ac-surface-2); border-radius: 2px; }
+dl { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+dl > div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; font-size: .84rem; }
+dt { color: var(--ac-text-muted); font-weight: 600; }
+dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: .84rem; }
+.lista li { display: flex; justify-content: space-between; gap: 10px; }
+.lista li span { display: inline-flex; align-items: center; gap: 6px; color: var(--ac-text); }
+.lista mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--ac-text-muted); }
+.obs { margin: 0; font-size: .84rem; line-height: 1.55; white-space: pre-line; }
+
+.total { display: flex; align-items: baseline; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--ac-border); }
+.total span { font-size: .8rem; font-weight: 700; color: var(--ac-text-muted); }
+.total strong { font-size: 1.5rem; font-weight: 800; color: #ff8a9a; }
+.aviso { display: flex; gap: 10px; padding: 12px; background: rgba(251, 191, 36, .1); color: var(--ac-text); }
+.aviso mat-icon { color: #fbbf24; flex-shrink: 0; }
+.aviso strong { font-size: .84rem; color: #fbbf24; }
+.aviso p { margin: 4px 0 0; font-size: .78rem; line-height: 1.5; }
+.nota-acordado { display: flex; align-items: flex-start; gap: 6px; margin: 0; font-size: .76rem; color: var(--ac-text-muted); line-height: 1.45; }
+.nota-acordado mat-icon { font-size: 16px; width: 16px; height: 16px; color: #34d399; flex-shrink: 0; }
+
+.cobro-fila { display: flex; justify-content: space-between; font-size: .88rem; font-weight: 600; }
+.barra { height: 6px; border-radius: 999px; background: var(--ac-surface-3); overflow: hidden; }
+.barra span { display: block; height: 100%; max-width: 100%; background: #34d399; border-radius: inherit; }
+
+.pie { align-items: center; }
+.pie .espacio { flex: 1; }
+.pie .wa mat-icon { color: #34d399; }
+@media (max-width: 560px) { .pie { flex-wrap: wrap; } .pie .espacio { display: none; } }

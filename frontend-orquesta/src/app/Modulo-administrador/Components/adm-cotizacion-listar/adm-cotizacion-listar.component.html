@@ -1,58 +1,156 @@
-<h1>Cotizaciones</h1>
+<div class="adm-pagina">
+  <header class="adm-cabecera cabecera">
+    <div>
+      <span class="adm-kicker"><span class="adm-punto"></span> Flujo de contrataciones • Temporada {{ anio }}–{{ anio + 1 }}</span>
+      <h1>Cotizaciones de Clientes</h1>
+      <p>Supervisa solicitudes entrantes desde la web, actualiza estados en tiempo real y coordina contratos por WhatsApp oficial.</p>
+    </div>
+    <div class="adm-cabecera-acciones">
+      <label class="buscar">
+        <mat-icon>search</mat-icon>
+        <input type="search" [(ngModel)]="busqueda" placeholder="Buscar cliente, DNI, local…">
+      </label>
+      <button type="button" class="btn-filtros" [class.activo]="filtrosAbiertos" (click)="filtrosAbiertos = !filtrosAbiertos">
+        <mat-icon>tune</mat-icon> Filtros @if (filtrosActivos) { <b>{{ filtrosActivos }}</b> }
+      </button>
+      <button type="button" class="btn-nueva" (click)="modalNueva = true"><mat-icon>add_circle_outline</mat-icon> Nueva cotización</button>
+    </div>
+  </header>
 
-<mat-button-toggle-group [(ngModel)]="filtro" (change)="cargar()" class="filtros">
-  <mat-button-toggle value="">Todas</mat-button-toggle>
-  <mat-button-toggle value="pendiente">Pendientes</mat-button-toggle>
-  <mat-button-toggle value="confirmada">Confirmadas</mat-button-toggle>
-  <mat-button-toggle value="pagada">Pagadas</mat-button-toggle>
-  <mat-button-toggle value="realizada">Realizadas</mat-button-toggle>
-</mat-button-toggle-group>
+  @if (filtrosAbiertos) {
+    <div class="panel-filtros">
+      <label class="adm-campo">
+        <span class="adm-label">Evento desde</span>
+        <span class="adm-control"><input type="date" [(ngModel)]="desde"></span>
+      </label>
+      <label class="adm-campo">
+        <span class="adm-label">Hasta</span>
+        <span class="adm-control"><input type="date" [(ngModel)]="hasta"></span>
+      </label>
+      <label class="adm-campo">
+        <span class="adm-label">Distrito</span>
+        <span class="adm-control">
+          <select [(ngModel)]="distrito">
+            <option value="">Todos</option>
+            @for (d of distritos; track d) { <option [value]="d">{{ d }}</option> }
+          </select>
+        </span>
+      </label>
+      <label class="adm-campo">
+        <span class="adm-label">Estado</span>
+        <span class="adm-control">
+          <select [(ngModel)]="filtro">
+            <option value="">Todos</option>
+            @for (e of estados; track e.valor) { <option [value]="e.valor">{{ e.texto }}</option> }
+          </select>
+        </span>
+      </label>
+      <div class="panel-acciones">
+        <button type="button" class="adm-btn-sec" (click)="limpiarFiltros(); filtro = ''">Limpiar</button>
+        <button type="button" class="adm-btn-sec" (click)="exportar()" [disabled]="!filtradas.length"><mat-icon>download</mat-icon> Excel</button>
+      </div>
+    </div>
+  }
 
-<mat-card class="panel">
-  <table mat-table [dataSource]="lista" class="tabla">
-    <ng-container matColumnDef="folio">
-      <th mat-header-cell *matHeaderCellDef>#</th>
-      <td mat-cell *matCellDef="let c">{{ c.id }}</td>
-    </ng-container>
-    <ng-container matColumnDef="cliente">
-      <th mat-header-cell *matHeaderCellDef>Cliente</th>
-      <td mat-cell *matCellDef="let c">{{ c.nombreCliente }}<br><small>{{ c.telefonoCliente }}</small></td>
-    </ng-container>
-    <ng-container matColumnDef="evento">
-      <th mat-header-cell *matHeaderCellDef>Evento</th>
-      <td mat-cell *matCellDef="let c">{{ c.fechaEvento | slice:0:10 }} · {{ c.diaSemana }}<br><small>{{ c.paquete?.nombre }} · {{ c.horasSolicitadas }}h</small></td>
-    </ng-container>
-    <ng-container matColumnDef="tipo">
-      <th mat-header-cell *matHeaderCellDef>Tipo</th>
-      <td mat-cell *matCellDef="let c">{{ c.tipoEvento || '—' }}<br><small>{{ c.horaInicio ? 'Inicia ' + c.horaInicio : '' }}</small></td>
-    </ng-container>
-    <ng-container matColumnDef="ubicacion">
-      <th mat-header-cell *matHeaderCellDef>Ubicación</th>
-      <td mat-cell *matCellDef="let c">{{ c.distrito?.nombre }}<br><small>{{ c.direccionEvento || '—' }}</small></td>
-    </ng-container>
-    <ng-container matColumnDef="total">
-      <th mat-header-cell *matHeaderCellDef>Total</th>
-      <td mat-cell *matCellDef="let c">
-        <strong>{{ pen(c.total) }}</strong>
-        @if (c.tieneATratar) {
-          <mat-icon class="warn" [matTooltip]="c.motivoATratar || 'A tratar'">report_problem</mat-icon>
-        }
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="estado">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let c">
-        <mat-form-field appearance="outline" class="sel-estado" [class]="'estado-' + c.estado" subscriptSizing="dynamic">
-          <mat-select [(ngModel)]="c.estado" (selectionChange)="cambiar(c, $event.value)">
-            @for (e of estados; track e) { <mat-option [value]="e">{{ e }}</mat-option> }
-          </mat-select>
-        </mat-form-field>
-      </td>
-    </ng-container>
+  <div class="adm-tabs pestanas">
+    <button type="button" class="adm-tab" [class.activo]="filtro === ''" (click)="filtro = ''">Todas <b>{{ contar('') }}</b></button>
+    @for (e of pestanas; track e.valor) {
+      <button type="button" class="adm-tab" [class.activo]="filtro === e.valor" [class.pend]="e.valor === 'pendiente'" (click)="filtro = e.valor">
+        @if (e.valor === 'pendiente') { <span class="adm-punto"></span> }
+        {{ e.texto }}s <b>{{ contar(e.valor) }}</b>
+      </button>
+    }
+  </div>
 
-    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-    <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
-  </table>
+  <section class="tabla-tarjeta">
+    <div class="adm-tabla-scroll">
+      <table class="adm-tabla">
+        <thead>
+          <tr>
+            <th># ID</th><th>Cliente</th><th>Evento &amp;<br>Formación</th><th>Tipo</th><th>Ubicación</th>
+            <th class="der">Total<br>cotizado</th><th class="centro">Estado</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of filtradas; track c.id) {
+            <tr>
+              <td class="id">
+                <strong>#COT-<br>{{ c.id }}</strong>
+                <small>{{ fechaMedia(c.fechaCreacion) }}</small>
+              </td>
+              <td class="cliente">
+                <button type="button" class="nombre" (click)="detalle = c" matTooltip="Ver detalle">{{ c.nombreCliente }}</button>
+                <span class="contacto">
+                  <span class="tel"><mat-icon>call</mat-icon>{{ c.telefonoCliente }}</span>
+                  @if (c.dniCliente) { <span class="sep">•</span><span class="dni">DNI: {{ c.dniCliente }}</span> }
+                </span>
+              </td>
+              <td class="evento">
+                <strong><mat-icon>event</mat-icon>{{ fechaIso(c) }} • {{ diaTxt(c) }}</strong>
+                <span class="evento-fila">
+                  <small>{{ c.paquete?.nombre || 'Paquete #' + c.paqueteId }} • {{ c.horasSolicitadas }} horas</small>
+                  @if (c.tieneATratar) { <span class="mini-chip">A tratar</span> }
+                </span>
+              </td>
+              <td class="tipo">
+                <span class="tipo-chip" [class.rojo]="(c.tipoEvento || '').toLowerCase().includes('boda')">{{ tipoTxt(c) }}</span>
+                @if (hora(c)) { <small>Inicia {{ hora(c) }} hrs</small> }
+              </td>
+              <td class="ubicacion">
+                <strong><mat-icon>location_on</mat-icon>{{ c.distrito?.nombre || '—' }}</strong>
+                @if (c.direccionEvento) { <small [matTooltip]="c.direccionEvento">{{ c.direccionEvento }}</small> }
+              </td>
+              <td class="der total">
+                <span class="moneda">S/</span>
+                <strong>{{ monto(c.total) }}</strong>
+                @if (tieneSaldo(c)) {
+                  <small class="saldo">Saldo: S/ {{ monto(saldo(c)) }}</small>
+                } @else if ((c.estado === 'pagada' || c.estado === 'realizada' || c.estado === 'confirmada') && c.total > 0) {
+                  <small class="txt-verde">Cobrado</small>
+                }
+                @if (notaTotal(c)) {
+                  <small [class.txt-dorado]="c.tieneATratar" [matTooltip]="c.tieneATratar ? (c.motivoATratar || '') : ''">{{ notaTotal(c) }}</small>
+                }
+              </td>
+              <td class="centro">
+                <label class="estado-select" [class]="estadoInfo(c.estado).tono">
+                  @if (c.estado !== 'pendiente') { <span class="adm-punto"></span> }
+                  <select [ngModel]="c.estado" (ngModelChange)="cambiar(c, $event)" aria-label="Estado">
+                    @for (e of estados; track e.valor) { <option [value]="e.valor">{{ e.texto }}</option> }
+                  </select>
+                  <mat-icon>arrow_drop_down</mat-icon>
+                </label>
+              </td>
+              <td class="acciones">
+                <button type="button" class="btn-ver" (click)="detalle = c" matTooltip="Ver detalle" aria-label="Ver detalle">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <a class="btn-wa" [href]="whatsapp(c)" target="_blank" rel="noopener" matTooltip="Escribir por WhatsApp" aria-label="WhatsApp">
+                  <mat-icon>chat</mat-icon>
+                </a>
+                <button type="button" class="btn-pdf" (click)="contrato(c)" [disabled]="descargando === c.id" matTooltip="Descargar contrato PDF" aria-label="Contrato">
+                  <mat-icon>{{ descargando === c.id ? 'hourglass_top' : 'picture_as_pdf' }}</mat-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="adm-vacio">{{ cargando ? 'Cargando…' : 'No hay cotizaciones que coincidan.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
 
-  @if (lista.length === 0) { <p class="vacio">No hay cotizaciones en esta categoría.</p> }
-</mat-card>
+@if (modalNueva) {
+  <adm-cotizacion-manual (cerrar)="modalNueva = false" (creada)="cotizacionCreada()" />
+}
+
+@if (detalle; as d) {
+  <adm-cotizacion-detalle [cotizacion]="d" [cobrado]="cobrado(d)" [whatsapp]="whatsapp(d)" [descargando]="descargando === d.id"
+                          (cerrar)="detalle = null" (editar)="abrirEdicion()" (contrato)="contrato(d)" />
+}
+
+@if (edicion; as e) {
+  <adm-cotizacion-manual [editar]="e" (cerrar)="edicion = null" (creada)="edicionGuardada($event)" />
+}

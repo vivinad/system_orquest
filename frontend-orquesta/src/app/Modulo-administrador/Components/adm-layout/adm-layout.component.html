@@ -1,22 +1,75 @@
-<mat-toolbar class="topbar">
-  <button matIconButton routerLink="/" title="Volver a la página principal"><mat-icon>arrow_back</mat-icon></button>
-  <span class="marca texto-gradiente">Agua Cristalina</span>
-  <span class="sep">· Administración</span>
-  <span class="spacer"></span>
-  <span class="usuario">{{ userContext.user$.value?.nombre }}</span>
-  <button matIconButton (click)="salir()" title="Cerrar sesión"><mat-icon>logout</mat-icon></button>
-</mat-toolbar>
+<div class="adm" [class.menu-abierto]="menuAbierto">
+  <!-- ============ Barra lateral ============ -->
+  <aside class="lateral">
+    <a routerLink="/main/dashboard" class="marca">
+      <span class="marca-logo"><img src="logo.png" alt="Agua Cristalina"></span>
+      <span class="marca-texto">
+        <strong>Wendy y su Agua</strong>
+        <small><span class="punto-online"></span> Administración • Online</small>
+      </span>
+    </a>
 
-<div class="cuerpo">
-  <nav class="menu">
-    <a routerLink="/main/dashboard" routerLinkActive="activo"><mat-icon>dashboard</mat-icon> Dashboard</a>
-    <a routerLink="/main/cotizaciones" routerLinkActive="activo"><mat-icon>request_quote</mat-icon> Cotizaciones</a>
-    <a routerLink="/main/finanzas" routerLinkActive="activo"><mat-icon>payments</mat-icon> Finanzas</a>
-    <a routerLink="/main/catalogo" routerLinkActive="activo"><mat-icon>library_music</mat-icon> Catálogo</a>
-    <a routerLink="/main/eventos" routerLinkActive="activo"><mat-icon>event</mat-icon> Eventos</a>
-    <a routerLink="/main/contenido" routerLinkActive="activo"><mat-icon>photo_library</mat-icon> Contenido web</a>
-    <span class="menu-spacer"></span>
-    <a routerLink="/" class="volver-web"><mat-icon>public</mat-icon> Ver página web</a>
-  </nav>
-  <main class="contenido"><router-outlet /></main>
+    <nav class="menu">
+      @for (m of menu; track m.ruta) {
+        <a [routerLink]="m.ruta" routerLinkActive="activo">
+          <mat-icon>{{ m.icono }}</mat-icon>
+          <span class="menu-texto">{{ m.texto }}</span>
+          @if (m.ruta === '/main/cotizaciones' && pendientes > 0) {
+            <span class="menu-badge">{{ pendientes }} {{ pendientes === 1 ? 'pendiente' : 'pendientes' }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <span class="lateral-espacio"></span>
+
+    <a href="/" class="ver-web" target="_blank" rel="noopener">
+      <mat-icon>open_in_new</mat-icon>
+      <span>Ver página web</span>
+      <mat-icon class="ver-web-flecha">north_east</mat-icon>
+    </a>
+
+    <div class="usuario">
+      <span class="usuario-avatar"><img src="logo.png" alt=""></span>
+      <span class="usuario-datos">
+        <strong>{{ nombre }}</strong>
+        <small>{{ rol }}</small>
+      </span>
+      <button type="button" class="usuario-salir" (click)="salir()" matTooltip="Cerrar sesión" aria-label="Cerrar sesión">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </aside>
+
+  <div class="velo" (click)="menuAbierto = false"></div>
+
+  <!-- ============ Contenido ============ -->
+  <div class="principal">
+    <header class="superior">
+      <button type="button" class="hamburguesa" (click)="menuAbierto = !menuAbierto" aria-label="Abrir menú">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div class="migas">
+        <span>Admin</span>
+        <mat-icon>chevron_right</mat-icon>
+        <strong [class.secundaria]="!!miga">Panel de Control</strong>
+        @if (miga) {
+          <mat-icon>chevron_right</mat-icon>
+          <strong>{{ miga }}</strong>
+        }
+      </div>
+      <span class="superior-espacio"></span>
+      <label class="buscador">
+        <mat-icon>search</mat-icon>
+        <input type="search" [(ngModel)]="busqueda" (keyup.enter)="buscar()" placeholder="Buscar evento, fecha, contrato…" aria-label="Buscar">
+      </label>
+      <button type="button" class="tema-btn" (click)="tema.alternar()"
+              [matTooltip]="tema.tema() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'" aria-label="Cambiar tema">
+        <mat-icon>{{ tema.tema() === 'oscuro' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+      <span class="superior-avatar" [matTooltip]="nombre"><img src="logo.png" alt=""></span>
+    </header>
+
+    <main class="contenido"><router-outlet /></main>
+  </div>
 </div>

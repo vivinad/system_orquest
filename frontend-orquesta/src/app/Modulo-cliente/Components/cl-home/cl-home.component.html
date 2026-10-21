@@ -1,185 +1,439 @@
 <!-- ===== Navbar ===== -->
-<header class="nav">
-  <a href="#inicio" class="brand">
-    <img src="logo.png" alt="Agua Cristalina" class="logo-img">
+<header class="nav" [class.con-sombra]="scrolled">
+  <a href="#inicio" class="brand" (click)="irA($event, 'inicio')">
+    <span class="logo-caja"><img src="logo.png" alt="Agua Cristalina" class="logo-img"></span>
+    <span class="brand-texto">
+      <span class="brand-kicker"><span class="punto"></span>Orquesta de gala</span>
+      <span class="brand-lugar">Máncora &amp; Piura</span>
+    </span>
   </a>
-  <nav class="links">
-    <a href="#eventos">Eventos</a>
-    <a href="#videos">Videos</a>
-    <a href="#nosotros">Nosotros</a>
-    <a routerLink="/login" class="admin">Admin</a>
+
+  <nav class="links" aria-label="Secciones">
+    @for (l of enlaces; track l.id) {
+      <a [href]="'#' + l.id" [class.activo]="seccionActiva === l.id" (click)="irA($event, l.id)">{{ l.texto }}</a>
+    }
   </nav>
-  <button matButton="filled" class="btn-gradiente nav-cta" routerLink="/cotizar">Cotiza tu evento</button>
+
+  <div class="nav-acciones">
+    <a routerLink="/cotizar" class="btn-cta btn-cta-sm">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span>Cotizar mi evento</span>
+    </a>
+    <button type="button" class="btn-icono" (click)="alternarTema()"
+            [matTooltip]="tema() === 'oscuro' ? 'Tema claro' : 'Tema oscuro'"
+            [attr.aria-label]="tema() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'">
+      @if (tema() === 'oscuro') {
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.55 1.55M17.15 17.15l1.55 1.55M5.3 18.7l1.55-1.55M17.15 6.85l1.55-1.55"/></svg>
+      } @else {
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 14.6A8.2 8.2 0 0 1 9.4 3.8a8.2 8.2 0 1 0 10.8 10.8Z"/></svg>
+      }
+    </button>
+    <a routerLink="/login" class="btn-icono" matTooltip="Acceso administrativo" aria-label="Acceso administrativo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/></svg>
+    </a>
+  </div>
 </header>
 
 <!-- ===== Hero ===== -->
 <section id="inicio" class="hero">
-  <!-- Foto de fondo (carrusel automático), oscurecida para resaltar el texto -->
-  <div class="hero-fondo">
-    <div class="slider-track" [style.transform]="'translateX(-' + fotoActual * 100 + '%)'">
-      @for (f of fotos; track f) {
-        <img [src]="f" alt="Agrupación Agua Cristalina" class="foto-slide">
-      }
-    </div>
-    <div class="hero-overlay"></div>
-  </div>
-
   <div class="hero-grid">
-    <div class="hero-content">
-      <span class="badge">🌴 Amplio repertorio · Máncora — Piura</span>
+
+    <!-- Columna de texto -->
+    <div class="hero-texto">
+      <span class="chip-hero">
+        <span class="punto vivo"></span>
+        Máncora — Piura · Show exclusivo en vivo <span aria-hidden="true">🎉</span>
+      </span>
+
       <h1 class="hero-titulo">
-        <span class="hero-nombre">Wendy y su</span>
-        <span class="texto-gradiente hero-agua">Agua Cristalina</span>
+        <span class="hero-wendy"><span class="estrella" aria-hidden="true">☆</span> Wendy y su <span class="estrella" aria-hidden="true">☆</span></span>
+        <span class="hero-agua">Agua</span>
+        <span class="hero-cristalina">Cristalina</span>
       </h1>
-      <div class="hero-cta">
-        <button matButton="filled" class="btn-gradiente extra-grande" routerLink="/cotizar">
-          <mat-icon>request_quote</mat-icon> Cotiza
-        </button>
-        <a href="#eventos" matButton="outlined" class="extra-grande hero-vermas">
-          Ver más
+
+      <p class="hero-desc">
+        Llevamos energía, sabor costero y emoción a tus momentos inolvidables. Música en vivo para
+        bodas en la playa, aniversarios, galas corporativas y celebraciones en la costa norte y todo el Perú.
+      </p>
+
+      <div class="hero-botones">
+        <a routerLink="/cotizar" class="btn-cta">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          Cotizar mi evento
+        </a>
+        <a href="#videos" class="btn-secundario" (click)="irA($event, 'videos')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path class="relleno" d="M10 8.6v6.8l5.6-3.4z"/></svg>
+          Ver repertorio y videos
         </a>
       </div>
+
+      <dl class="stats">
+        <div class="stat"><dt class="c-dorado">+10 Años</dt><dd>De trayectoria</dd></div>
+        <div class="stat"><dt class="c-verde">100%</dt><dd>Show en vivo</dd></div>
+        <div class="stat"><dt class="c-rosa">+500</dt><dd>Fiestas y bodas</dd></div>
+        <div class="stat">
+          <dt class="c-texto">
+            <svg class="check" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7L16 9.6"/></svg>Pro
+          </dt>
+          <dd>Sonido &amp; puntualidad</dd>
+        </div>
+      </dl>
     </div>
 
-    <aside class="hero-lema-card">
-      <p class="lema">
-        Somos una agrupación musical con un repertorio variado, capaz de adaptarnos a
-        cualquier ambiente y ocasión. Fusionamos distintos géneros para llevar energía,
-        sabor y emoción a cada presentación, ya sea en fiestas privadas, eventos sociales
-        o celebraciones especiales. Con años de experiencia sobre el escenario, nuestro
-        compromiso es hacer de cada evento un momento inolvidable, combinando talento,
-        pasión y profesionalismo en cada nota.
-        ¡Déjanos ser parte de tu celebración!
-      </p>
-    </aside>
-  </div>
-  <a href="#eventos" class="scroll-down"><mat-icon>expand_more</mat-icon></a>
-</section>
-
-<!-- ===== Próximos eventos ===== -->
-@if (eventos.length > 0) {
-  <section id="eventos" class="eventos">
-    <div class="contenedor">
-      <h2 class="seccion-titulo">Próximos <span class="texto-gradiente">eventos</span></h2>
-      <p class="seccion-sub">¡Ven a gozar con Agua Cristalina! Te esperamos en nuestros próximos shows.</p>
-
-      <div class="evento">
-        <div class="evento-slider">
-          <div class="slider-track" [style.transform]="'translateX(-' + eventoIndex * 100 + '%)'">
-            @for (e of eventos; track e.id) {
-              <figure class="evento-slide">
-                @if (e.imagenUrl) {
-                  <img [src]="e.imagenUrl" class="foto-slide" [alt]="e.titulo">
-                } @else {
-                  <div class="foto-slide sin-flyer">
-                    <mat-icon>event</mat-icon>
-                    <span>Sin flyer</span>
-                  </div>
-                }
-                <figcaption class="evento-caption">
-                  <mat-icon>event</mat-icon>
-                  <span><strong>{{ e.titulo }}</strong> — {{ e.fechaTexto }}</span>
-                </figcaption>
-              </figure>
-            }
-          </div>
-          @if (eventos.length > 1) {
-            <button class="flecha izq" (click)="eventoManual(-1)" aria-label="Evento anterior">
-              <mat-icon>chevron_left</mat-icon>
-            </button>
-            <button class="flecha der" (click)="eventoManual(1)" aria-label="Evento siguiente">
-              <mat-icon>chevron_right</mat-icon>
-            </button>
+    <!-- Columna visual: carrusel de fotos + tarjeta de preview -->
+    <div class="hero-visual">
+      <div class="foto-card">
+        <div class="slider-track" [style.transform]="'translateX(-' + fotoActual * 100 + '%)'">
+          @for (f of fotos; track $index) {
+            <img [src]="f" alt="Agrupación Agua Cristalina en vivo" class="foto-slide">
           }
         </div>
-        @if (eventoActual; as ev) {
-          <div class="evento-mapa">
-            <iframe [src]="mapaDe(ev.direccion)" loading="lazy" allowfullscreen
-                    referrerpolicy="no-referrer-when-downgrade" title="Ubicación del evento"></iframe>
-            <p class="evento-dir">
-              <mat-icon>location_on</mat-icon>
-              {{ ev.lugar }} · {{ ev.direccion }}
-            </p>
+        <div class="foto-sombra"></div>
+
+        <span class="chip-foto">Temporada {{ anio }} · Máncora &amp; Norte</span>
+
+        <div class="foto-pie">
+          <p class="foto-titulo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+            Hasta 11 músicos en escenario
+          </p>
+          <p class="foto-sub">Voces, percusión y vientos en vivo</p>
+        </div>
+
+        @if (fotos.length > 1) {
+          <div class="foto-puntos" role="tablist" aria-label="Fotos">
+            @for (f of fotos; track $index; let i = $index) {
+              <button type="button" [class.activo]="i === fotoActual" (click)="fotoManual(i)"
+                      [attr.aria-label]="'Ver foto ' + (i + 1)"></button>
+            }
           </div>
         }
       </div>
+
+      <!-- Tarjeta flotante: abre el video más solicitado -->
+      <div class="preview-card">
+        <span class="preview-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 4v16M8 8v8M16 8v8M4 10.5v3M20 10.5v3"/></svg>
+        </span>
+        <div class="preview-texto">
+          <span class="preview-label">Preview más solicitado</span>
+          <span class="preview-titulo">Mix Cumbia &amp; Fiesta Norteña</span>
+          <span class="ecualizador" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <button type="button" class="preview-play" (click)="abrirPreview()" aria-label="Reproducir el mix">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.8v10.4l8.2-5.2z"/></svg>
+        </button>
+      </div>
+
+      <a [href]="waLink" target="_blank" rel="noopener" class="btn-wa">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5z"/><path d="M8 8h8M8 11.5h5"/></svg>
+        Escríbenos por WhatsApp
+        <span class="wa-etiqueta">Respuesta inmediata</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Modal: video del preview ===== -->
+@if (previewAbierto) {
+  <div class="modal-fondo" (click)="cerrarPreview()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-preview" (click)="$event.stopPropagation()">
+      <header class="modal-cabecera">
+        <span class="preview-icono pequeno" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 4v16M8 8v8M16 8v8M4 10.5v3M20 10.5v3"/></svg>
+        </span>
+        <div>
+          <span class="preview-label">Preview más solicitado</span>
+          <h2 id="titulo-preview">Mix Cumbia &amp; Fiesta Norteña</h2>
+        </div>
+        <button type="button" class="btn-icono cerrar" (click)="cerrarPreview()" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="modal-video">
+        <iframe [src]="previewUrl" allowfullscreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                referrerpolicy="strict-origin-when-cross-origin" title="Mix Cumbia y Fiesta Norteña"></iframe>
+      </div>
+      <footer class="modal-pie">
+        <a routerLink="/cotizar" class="btn-cta btn-cta-sm">Quiero esta música en mi evento</a>
+        <a href="#videos" class="btn-secundario btn-secundario-sm" (click)="cerrarPreview(); irA($event, 'videos')">Ver todos los videos</a>
+      </footer>
+    </div>
+  </div>
+}
+
+<!-- ===== Próximos eventos ===== -->
+@if (eventos.length > 0) {
+  <section id="eventos" class="seccion eventos">
+    <div class="contenedor">
+      <header class="seccion-cabecera">
+        <span class="chip-seccion"><span class="punto"></span>Agenda</span>
+        <h2 class="seccion-titulo">Próximos <span class="texto-gradiente">eventos</span></h2>
+        <p class="seccion-sub">¡Ven a gozar con Agua Cristalina! Te esperamos en nuestros próximos shows.</p>
+      </header>
+
+      <!-- Vitrina: el evento elegido (afiche + lugar + mapa) -->
+      @if (eventoActual; as ev) {
+        <article class="vitrina" id="vitrina-evento">
+          <div class="vitrina-afiche">
+            <div class="slider-track" [style.transform]="'translateX(-' + eventoIndex * 100 + '%)'">
+              @for (e of eventos; track e.id) {
+                <div class="afiche-slide">
+                  @if (e.imagenUrl) {
+                    <img [src]="e.imagenUrl" class="afiche-fondo" alt="" aria-hidden="true">
+                    <img [src]="e.imagenUrl" class="afiche-img" [alt]="'Afiche: ' + e.titulo">
+                  } @else {
+                    <div class="sin-flyer"><mat-icon>event</mat-icon><span>Sin afiche</span></div>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="afiche-chips">
+              <span class="chip-afiche rosa">
+                <mat-icon>{{ eventoIndex === 0 ? 'local_fire_department' : 'event' }}</mat-icon>
+                {{ eventoIndex === 0 ? 'Próximo evento' : 'Evento ' + (eventoIndex + 1) + ' de ' + eventos.length }}
+              </span>
+              @if (ev.categoria) {
+                <span class="chip-afiche verde"><mat-icon>autorenew</mat-icon>{{ ev.categoria }}</span>
+              }
+            </div>
+
+            @if (eventos.length > 1) {
+              <button class="flecha izq" (click)="eventoManual(-1)" aria-label="Evento anterior">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button class="flecha der" (click)="eventoManual(1)" aria-label="Evento siguiente">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            }
+
+            <div class="afiche-pie">
+              <span class="afiche-icono"><mat-icon>event</mat-icon></span>
+              <p><strong>{{ ev.titulo }}</strong> <span>— {{ ev.fechaTexto }}</span></p>
+              @if (ev.horario) {
+                <span class="chip-hora"><mat-icon>schedule</mat-icon>{{ ev.horario }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="vitrina-info">
+            <span class="kicker">Lugar y punto de encuentro</span>
+            <h3 class="vitrina-lugar">{{ ev.lugar || ev.titulo }}</h3>
+            <p class="vitrina-dir"><mat-icon>location_on</mat-icon>{{ ev.direccion }}</p>
+
+            <div class="mapa-card">
+              <div class="mapa-wrap">
+                <iframe [src]="mapaDe(ev.direccion)" loading="lazy" allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade" title="Ubicación del evento"></iframe>
+                <div class="mapa-flotante">
+                  <strong>{{ ev.lugar || 'Ubicación del evento' }}</strong>
+                  <small>{{ ev.direccion }}</small>
+                  <a [href]="mapsUrl(ev.direccion)" target="_blank" rel="noopener" class="btn-mapa">
+                    <mat-icon>open_in_new</mat-icon> Abrir en Maps
+                  </a>
+                </div>
+              </div>
+              <div class="mapa-acciones">
+                <a [href]="comoLlegarUrl(ev.direccion)" target="_blank" rel="noopener">
+                  <mat-icon>directions</mat-icon> ¿Cómo llegar fácilmente?
+                </a>
+                <button type="button" (click)="copiarDireccion(ev.direccion)">
+                  <mat-icon>content_copy</mat-icon> Copiar dirección
+                </button>
+              </div>
+            </div>
+
+            @if (serviciosDe(ev).length > 0) {
+              <ul class="servicios-local">
+                @for (sv of serviciosDe(ev); track sv; let k = $index) {
+                  <li [class]="'tono-' + (k % 4)"><mat-icon>{{ iconoServicio(sv) }}</mat-icon>{{ sv }}</li>
+                }
+              </ul>
+            }
+            @if (ev.descripcion) {
+              <p class="vitrina-desc">{{ ev.descripcion }}</p>
+            }
+
+            <a [href]="waEvento(ev)" target="_blank" rel="noopener" class="btn-reservar">
+              <mat-icon>chat</mat-icon> Consultar o reservar por WhatsApp
+            </a>
+            <p class="vitrina-nota"><mat-icon>info</mat-icon> Te respondemos con la disponibilidad y los detalles del evento.</p>
+          </div>
+        </article>
+      }
+
+      <!-- Cartelera: todas las fechas; al tocar una, se muestra arriba -->
+      @if (eventos.length > 1) {
+        <div class="cartelera">
+          <div class="cartelera-cabecera">
+            <div>
+              <span class="kicker rosa">Cartelera {{ anioCartelera }}</span>
+              <h3>Más fechas confirmadas</h3>
+              <p>Acompaña a la agrupación en sus diferentes presentaciones. Toca una fecha para ver su afiche y ubicación.</p>
+            </div>
+            <a routerLink="/cotizar" class="btn-ciudad">¿Quieres a la orquesta en tu evento? <mat-icon>arrow_forward</mat-icon></a>
+          </div>
+
+          <div class="cartelera-grid">
+            @for (e of eventos; track e.id; let i = $index) {
+              <article class="fecha-card" [class.activa]="i === eventoIndex" tabindex="0" role="button"
+                       [attr.aria-label]="'Ver ' + e.titulo" (click)="seleccionarEvento(i)" (keydown.enter)="seleccionarEvento(i)">
+                <div class="fecha-top">
+                  <span class="tag-categoria" [class]="'tag-categoria tono-' + (i % 3)">{{ e.categoria || 'Show en vivo' }}</span>
+                  @if (i === eventoIndex) {
+                    <span class="estado viendo"><span class="punto rosa"></span>Viendo ahora</span>
+                  } @else {
+                    <span class="estado"><mat-icon>check_circle</mat-icon>Confirmado</span>
+                  }
+                </div>
+                <p class="fecha-texto">{{ e.fechaTexto }}</p>
+                <h4>{{ e.titulo }}</h4>
+                @if (e.descripcion) { <p class="fecha-desc">{{ e.descripcion }}</p> }
+                <div class="fecha-datos">
+                  <span><mat-icon class="c-rosa">location_on</mat-icon>{{ e.lugar || e.direccion }}</span>
+                  @if (e.horario) { <span><mat-icon class="c-dorado">schedule</mat-icon>{{ e.horario }}</span> }
+                </div>
+                <a [href]="waEvento(e)" target="_blank" rel="noopener" class="btn-consultar" (click)="$event.stopPropagation()">
+                  <mat-icon>chat</mat-icon> Consultar por WhatsApp
+                </a>
+              </article>
+            }
+          </div>
+        </div>
+      }
     </div>
   </section>
 }
 
 <!-- ===== Videos ===== -->
 @if (videosYT.length > 0) {
-  <section id="videos" class="videos">
+  <section id="videos" class="seccion videos">
     <div class="contenedor">
-      <h2 class="seccion-titulo"> <span class="texto-gradiente">ESCUCHANOS</span></h2>
-      <p class="seccion-sub">Un adelanto de lo que Agua Cristalina lleva a tu evento.</p>
-      <div class="video-frame video-principal">
-        <iframe [src]="videoDe(videoActual)" loading="lazy" allowfullscreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                referrerpolicy="strict-origin-when-cross-origin"
-                title="Video de Agua Cristalina"></iframe>
-      </div>
-      @if (videosYT.length > 1) {
-        <div class="thumbs-carrusel">
-          <button type="button" class="thumb-flecha" (click)="desplazarThumbs(-1)" aria-label="Videos anteriores">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-          <div class="video-thumbs" #thumbsRow>
-            @for (v of videosYT; track v) {
-              <button type="button" class="thumb" [class.activa]="v === videoActual"
-                      (click)="seleccionarVideo(v)" title="Reproducir este video">
-                <img [src]="miniaturaDe(v)" alt="Miniatura de video" loading="lazy">
-                <mat-icon>play_circle</mat-icon>
-              </button>
-            }
+      <header class="seccion-cabecera">
+        <span class="chip-seccion"><span class="punto rosa"></span>En vivo &amp; repertorio</span>
+        <h2 class="titulo-escuchanos">Escúchanos</h2>
+        <p class="seccion-sub">
+          Un adelanto del ritmo tropical, calidad y fiesta que <strong>Wendy y su Agua Cristalina</strong>
+          lleva directamente a tu evento especial.
+        </p>
+      </header>
+
+      <!-- Reproductor principal -->
+      <div class="player">
+        <div class="player-cabecera">
+          <span class="player-avatar"><img src="logo.png" alt=""></span>
+          <div class="player-info">
+            <h3 class="player-titulo">{{ tituloDe(videoActual) }}</h3>
+            <span class="player-canal">Wendy y su Agua Cristalina</span>
           </div>
-          <button type="button" class="thumb-flecha" (click)="desplazarThumbs(1)" aria-label="Videos siguientes">
-            <mat-icon>chevron_right</mat-icon>
+          <button type="button" class="btn-chico" (click)="compartirVideo(videoActual)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>
+            Compartir
           </button>
         </div>
+        <div class="player-video">
+          <iframe [src]="videoDe(videoActual)" loading="lazy" allowfullscreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  [title]="tituloDe(videoActual)"></iframe>
+        </div>
+        <div class="player-pie">
+          <span class="chip-vivo"><span class="punto blanco"></span>Show en vivo · HD</span>
+          <a class="btn-chico" [href]="'https://www.youtube.com/watch?v=' + videoActual" target="_blank" rel="noopener">
+            Mirar en
+            <svg class="yt" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path class="relleno" d="m10 9 5 3-5 3z"/></svg>
+            YouTube
+          </a>
+        </div>
+      </div>
+
+      <!-- Más videos -->
+      @if (videosYT.length > 1) {
+        <div class="exitos-cabecera">
+          <h3><span class="icono-disco" aria-hidden="true"></span>Más éxitos &amp; presentaciones</h3>
+          <div class="exitos-flechas">
+            <button type="button" class="btn-icono" (click)="desplazarThumbs(-1)" aria-label="Videos anteriores">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>
+            </button>
+            <button type="button" class="btn-icono" (click)="desplazarThumbs(1)" aria-label="Videos siguientes">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="exitos" #thumbsRow>
+          @for (v of videosYT; track v) {
+            <button type="button" class="exito" [class.activa]="v === videoActual" (click)="seleccionarVideo(v)">
+              <span class="exito-mini">
+                <img [src]="miniaturaDe(v)" alt="" loading="lazy">
+                @if (v === videoActual) { <span class="badge-reproduciendo">Reproduciendo</span> }
+                <span class="exito-play" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path class="relleno" d="M9 6.8v10.4l8.2-5.2z"/></svg>
+                </span>
+              </span>
+              <span class="exito-titulo">{{ tituloDe(v) }}</span>
+              <span class="exito-sub">Wendy y su Agua Cristalina</span>
+            </button>
+          }
+        </div>
       }
+
+      <div class="videos-acciones">
+        <a class="btn-secundario" href="https://www.youtube.com/@wendyysuaguacristalina1667" target="_blank" rel="noopener">
+          <svg class="yt" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path class="relleno" d="m10 9 5 3-5 3z"/></svg>
+          Ver canal de YouTube completo
+        </a>
+        <a class="btn-cta" routerLink="/cotizar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          Cotizar show para mi evento
+        </a>
+      </div>
     </div>
   </section>
 }
 
 <!-- ===== Nosotros ===== -->
-<section id="nosotros" class="nosotros">
+<section id="nosotros" class="seccion nosotros">
   <div class="contenedor">
-    <h2 class="seccion-titulo">Nosotros</h2>
-    <p class="seccion-sub">
-      Somos <strong>Agua Cristalina</strong>, una agrupación de cumbia y sabor del norte liderada por
-      <strong>Wendy Querevalú Sabalú</strong>. Llevamos energía, ritmo y profesionalismo a cada escenario,
-      con equipo de sonido propio y formaciones desde 3 hasta 11 músicos.
-    </p>
+    <header class="seccion-cabecera">
+      <span class="logo-tile"><img src="logo.png" alt="Agua Cristalina"></span>
+      <h2 class="titulo-nosotros">Nosotros</h2>
+      <p class="seccion-sub ancho">
+        Somos <strong>Agua Cristalina</strong>, una agrupación de cumbia y sabor del norte liderada por
+        <span class="resalta">Wendy Querevalú Sabalú</span>. Llevamos energía, ritmo y profesionalismo a cada
+        escenario, con equipo de sonido propio y formaciones desde 3 hasta 11 músicos.
+      </p>
+    </header>
 
     <!-- Redes sociales -->
     <div class="redes-cards">
       <a class="red-card tiktok" href="https://vt.tiktok.com/ZSCKdEAxE/" target="_blank" rel="noopener">
-        <div class="red-foto"><img src="tiktok.png" alt="Agua Cristalina en TikTok"></div>
+        <span class="red-foto"><img src="tiktok.png" alt="Agua Cristalina en TikTok"></span>
         <span class="red-nombre">TikTok</span>
         <span class="red-user">Wendy y su Agua Cristalina</span>
         <span class="red-btn">Síguenos</span>
       </a>
       <a class="red-card facebook" href="https://www.facebook.com/profile.php?id=100063606396805" target="_blank" rel="noopener">
-        <div class="red-foto"><img src="facebook.png" alt="Agua Cristalina en Facebook"></div>
+        <span class="red-foto"><img src="facebook.png" alt="Agua Cristalina en Facebook"></span>
         <span class="red-nombre">Facebook</span>
         <span class="red-user">Wendy y su Agua Cristalina</span>
         <span class="red-btn">Síguenos</span>
       </a>
       <a class="red-card instagram" href="https://www.instagram.com/wendy.agua.cristalina?igsh=MjN2M25qa2NiaXdp" target="_blank" rel="noopener">
-        <div class="red-foto"><img src="logo.png" alt="Agua Cristalina en Instagram"></div>
+        <span class="red-foto"><img src="logo.png" alt="Agua Cristalina en Instagram"></span>
         <span class="red-nombre">Instagram</span>
         <span class="red-user">&#64;wendy.agua.cristalina</span>
         <span class="red-btn">Síguenos</span>
       </a>
       <a class="red-card youtube" href="https://www.youtube.com/@wendyysuaguacristalina1667" target="_blank" rel="noopener">
-        <div class="red-foto"><img [src]="miniaturaDe(videosYT[0])" alt="Agua Cristalina en YouTube"></div>
+        <span class="red-foto"><img [src]="miniaturaDe(videosYT[0])" alt="Agua Cristalina en YouTube"></span>
         <span class="red-nombre">YouTube</span>
         <span class="red-user">Wendy y su Agua Cristalina</span>
         <span class="red-btn">Suscríbete</span>
       </a>
       <a class="red-card whatsapp" [href]="waLink" target="_blank" rel="noopener">
-        <div class="red-foto"><img src="whatsApp.png" alt="Agua Cristalina en WhatsApp"></div>
+        <span class="red-foto"><img src="whatsApp.png" alt="Agua Cristalina en WhatsApp"></span>
         <span class="red-nombre">WhatsApp</span>
         <span class="red-user">993 771 153</span>
         <span class="red-btn">Escríbenos</span>
@@ -187,26 +441,27 @@
     </div>
 
     <div class="features">
-      <div class="feature"><mat-icon>verified</mat-icon><h3>Sonido propio</h3><p>Incluido en todos los paquetes.</p></div>
-      <div class="feature"><mat-icon>groups</mat-icon><h3>De 3 a más músicos</h3><p>La formación que tu evento necesite.</p></div>
-      <div class="feature"><mat-icon>local_shipping</mat-icon><h3>Movilidad en Lima</h3><p>Sin costo en Lima Metropolitana y Callao.</p></div>
-      <div class="feature"><mat-icon>celebration</mat-icon><h3>Para toda fiesta</h3><p>Bodas, quinceañeros, patronales y más.</p></div>
+      <div class="feature dorado"><span class="feature-icono"><mat-icon>verified_user</mat-icon></span><h3>Sonido propio</h3><p>Incluido en todos los paquetes.</p></div>
+      <div class="feature rosa"><span class="feature-icono"><mat-icon>groups</mat-icon></span><h3>De 3 a más músicos</h3><p>La formación que tu evento necesite.</p></div>
+      <div class="feature naranja"><span class="feature-icono"><mat-icon>local_shipping</mat-icon></span><h3>Movilidad en Lima</h3><p>Sin costo en Lima Metropolitana y Callao.</p></div>
+      <div class="feature verde"><span class="feature-icono"><mat-icon>sentiment_satisfied</mat-icon></span><h3>Para toda fiesta</h3><p>Bodas, quinceañeros, patronales y más.</p></div>
     </div>
   </div>
 </section>
 
 <!-- ===== Arma tu orquesta (CTA al cotizador) ===== -->
-<section id="arma" class="arma">
+<section id="arma" class="seccion arma">
   <div class="contenedor">
-    <h2 class="seccion-titulo">Arma tu orquesta a tu medida</h2>
-    <p class="seccion-sub">
+    <span class="chip-seccion"><span class="punto"></span>Presupuesto en tiempo real</span>
+    <h2 class="titulo-arma">Arma tu orquesta <span>a tu medida</span></h2>
+    <p class="seccion-sub ancho">
       Elige cuántos integrantes quieres, agrega músicos y servicios extra, y obtén tu precio al instante en nuestro cotizador.
     </p>
-    <div class="arma-cta">
-      <button matButton="filled" class="btn-gradiente grande" routerLink="/cotizar">
-        <mat-icon>tune</mat-icon> Empezar a cotizar
-      </button>
-    </div>
+    <a routerLink="/cotizar" class="btn-arma">
+      <span class="estrella-arma" aria-hidden="true">★</span>
+      Empezar a cotizar
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
   </div>
 </section>
 
@@ -214,9 +469,20 @@
 <cl-metodos-pago />
 
 <footer class="pie">
-  <span class="texto-gradiente brand-pie">Agua Cristalina</span>
-  <p>Representante: Wendy Querevalú Sabalú · Máncora — Piura</p>
-  <a routerLink="/login" class="admin-link">Acceso administrativo</a>
+  <span class="logo-tile chico"><img src="logo.png" alt="Agua Cristalina"></span>
+  <p class="pie-marca"><span class="c-verde">Wendy</span> y su <span class="c-rosa">Agua Cristalina</span></p>
+  <p class="pie-rep">Representante: <strong>Wendy Querevalú Sabalú</strong> <span class="sep">•</span> Máncora — Piura, Perú</p>
+  <nav class="pie-links" aria-label="Enlaces del pie">
+    <a routerLink="/cotizar">Cotizar evento</a>
+    <span class="sep">•</span>
+    <a [href]="waLink" target="_blank" rel="noopener">WhatsApp</a>
+    <span class="sep">•</span>
+    <a routerLink="/login">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
+      Acceso administrativo
+    </a>
+  </nav>
+  <p class="pie-copy">© {{ anio }} Todos los derechos reservados. Música en vivo, elegancia y cumbia costeña.</p>
 </footer>
 
 <!-- ===== WhatsApp flotante ===== -->

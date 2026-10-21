@@ -4,6 +4,9 @@ backend_orquesta/**/obj/
 **/.vs/
 **/*.csproj.user
 
+# Configuración local de cada PC (cadena de conexión propia)
+**/appsettings.Local.json
+
 # Contratos PDF generados en tiempo de ejecución (no son código fuente)
 backend_orquesta/**/Storage/
 

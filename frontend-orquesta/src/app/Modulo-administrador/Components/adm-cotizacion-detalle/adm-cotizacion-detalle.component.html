@@ -1,0 +1,109 @@
+<div class="adm-modal-fondo" (click)="cerrar.emit()">
+  <section class="adm-modal ancho adm-modal-brillo detalle" role="dialog" aria-modal="true" aria-labelledby="titulo-detalle" (click)="$event.stopPropagation()">
+    <div class="adm-modal-cab">
+      <div>
+        <div class="cab-chips">
+          <span class="adm-pill coral">COT-{{ c.id }}</span>
+          <span class="adm-chip" [class]="estadoInfo(c.estado).tono"><span class="adm-punto"></span>{{ estadoInfo(c.estado).texto }}</span>
+        </div>
+        <h2 id="titulo-detalle">{{ c.nombreCliente }}</h2>
+        <small>Registrada el {{ fechaMedia(c.fechaCreacion) }}</small>
+      </div>
+      <button type="button" class="adm-modal-cerrar" (click)="cerrar.emit()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <div class="adm-modal-cuerpo columnas">
+      <div class="modal-col">
+        <!-- Cliente -->
+        <div class="bloque">
+          <p class="adm-seccion-titulo">Cliente</p>
+          <dl>
+            <div><dt>Teléfono</dt><dd>{{ c.telefonoCliente }}</dd></div>
+            <div><dt>DNI</dt><dd>{{ c.dniCliente || '—' }}</dd></div>
+            <div><dt>Correo</dt><dd>{{ c.emailCliente || '—' }}</dd></div>
+            <div><dt>Dirección</dt><dd>{{ c.direccionCliente || '—' }}</dd></div>
+          </dl>
+        </div>
+
+        <!-- Evento -->
+        <div class="bloque">
+          <p class="adm-seccion-titulo">Evento</p>
+          <dl>
+            <div><dt>Tipo</dt><dd>{{ tipo }}</dd></div>
+            <div><dt>Fecha</dt><dd>{{ fechaMedia(c.fechaEvento) }} · {{ c.diaSemana }}</dd></div>
+            <div><dt>Horario</dt><dd>{{ horario || 'Por confirmar' }} ({{ c.horasSolicitadas }} h)</dd></div>
+            <div><dt>Paquete</dt><dd>{{ c.paquete?.nombre || 'Paquete #' + c.paqueteId }}</dd></div>
+            <div><dt>Distrito</dt><dd>{{ c.distrito?.nombre || '—' }}</dd></div>
+            <div><dt>Local</dt><dd>{{ c.direccionEvento || '—' }}</dd></div>
+          </dl>
+        </div>
+
+        @if ((c.musicos?.length || 0) > 0 || (c.extras?.length || 0) > 0) {
+          <div class="bloque">
+            <p class="adm-seccion-titulo">Adicionales</p>
+            <ul class="lista">
+              @for (m of c.musicos ?? []; track m.musicoId) {
+                <li><span><mat-icon>person_add</mat-icon>{{ m.cantidad }} × {{ nombreMusico(m.musicoId) }}</span><b>S/ {{ monto(m.precioAplicado * m.cantidad) }}</b></li>
+              }
+              @for (e of c.extras ?? []; track e.servicioId) {
+                <li><span><mat-icon>add_circle_outline</mat-icon>{{ nombreServicio(e.servicioId) }}</span></li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (c.observaciones) {
+          <div class="bloque">
+            <p class="adm-seccion-titulo">Observaciones del cliente</p>
+            <p class="obs">{{ c.observaciones }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="modal-col">
+        <!-- Montos -->
+        <div class="bloque montos">
+          <p class="adm-seccion-titulo">Montos</p>
+          <ul class="lista">
+            <li><span>Paquete ({{ c.horasSolicitadas }} h)</span><b>S/ {{ monto(c.costoPaquete) }}</b></li>
+            @if (c.costoMusicosExtra) { <li><span>Músicos adicionales</span><b>S/ {{ monto(c.costoMusicosExtra) }}</b></li> }
+            <li><span>Movilidad</span><b>S/ {{ monto(c.costoMovilidad) }}</b></li>
+          </ul>
+          <div class="total">
+            <span>{{ acordado ? 'Total acordado' : 'Total' }}</span>
+            <strong>S/ {{ monto(c.total) }}</strong>
+          </div>
+          @if (c.tieneATratar) {
+            <div class="aviso">
+              <mat-icon>info</mat-icon>
+              <div>
+                <strong>Pendiente de acordar con el cliente</strong>
+                <p>{{ c.motivoATratar }}</p>
+                <p>Conversa por WhatsApp y luego usa <b>Editar</b> para poner el monto acordado.</p>
+              </div>
+            </div>
+          } @else if (acordado) {
+            <p class="nota-acordado"><mat-icon>check_circle</mat-icon> Monto acordado por WhatsApp ({{ c.motivoATratar }})</p>
+          }
+        </div>
+
+        <!-- Cobros -->
+        <div class="bloque cobros">
+          <p class="adm-seccion-titulo">Cobros (Finanzas)</p>
+          <div class="cobro-fila"><span>Cobrado</span><b class="txt-verde">S/ {{ monto(cobrado) }}</b></div>
+          <div class="cobro-fila"><span>Saldo</span><b [class.txt-dorado]="saldo > 0" [class.txt-verde]="saldo === 0">S/ {{ monto(saldo) }}</b></div>
+          <div class="barra"><span [style.width.%]="c.total ? (cobrado / c.total) * 100 : 0"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-modal-pie pie">
+      <a class="adm-btn-sec wa" [href]="whatsapp" target="_blank" rel="noopener"><mat-icon>chat</mat-icon> WhatsApp</a>
+      <button type="button" class="adm-btn-sec" (click)="contrato.emit()" [disabled]="descargando">
+        <mat-icon>picture_as_pdf</mat-icon> {{ descargando ? 'Generando…' : 'Contrato PDF' }}
+      </button>
+      <span class="espacio"></span>
+      <button type="button" class="adm-btn" (click)="editar.emit()"><mat-icon>edit</mat-icon> Editar</button>
+    </div>
+  </section>
+</div>

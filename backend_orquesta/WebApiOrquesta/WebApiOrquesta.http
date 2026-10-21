@@ -1,0 +1,18 @@
+@WebApiOrquesta_HostAddress = http://localhost:5161
+
+GET {{WebApiOrquesta_HostAddress}}/api/paquete
+Accept: application/json
+
+###
+
+GET {{WebApiOrquesta_HostAddress}}/api/evento/vigentes
+Accept: application/json
+
+###
+
+POST {{WebApiOrquesta_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@aguacristalina.pe", "password": "tu_clave" }
+
+###

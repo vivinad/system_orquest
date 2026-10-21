@@ -14,10 +14,10 @@ import { Component } from '@angular/core';
 export class ClMetodosPagoComponent {
   // Para agregar o quitar un método: sube la imagen a la carpeta public\ y edita esta lista
   readonly metodos = [
-    { imagen: 'yape.png', nombre: 'Yape' },
-    { imagen: 'plin.png', nombre: 'Plin' },
-    { imagen: 'izipay.png', nombre: 'Izipay' },
-    { imagen: 'bcp.png', nombre: 'BCP' },
-    { imagen: 'bbva.png', nombre: 'BBVA' },
+    { imagen: 'yape.png', nombre: 'Yape', detalle: 'Billetera digital' },
+    { imagen: 'plin.png', nombre: 'Plin', detalle: 'Billetera digital' },
+    { imagen: 'izipay.png', nombre: 'Izipay', detalle: 'Tarjeta / POS' },
+    { imagen: 'bcp.png', nombre: 'BCP', detalle: 'Transferencia' },
+    { imagen: 'bbva.png', nombre: 'BBVA', detalle: 'Transferencia' },
   ];
 }

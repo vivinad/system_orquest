@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -28,12 +29,25 @@ export class SegLoginComponent {
   esMock = environment.useMock;
 
   entrar(): void {
+    // Espacios accidentales al inicio/fin del correo (p. ej. al copiar y pegar)
+    this.modelo.email = (this.modelo.email || '').trim();
+    if (!this.modelo.email || !this.modelo.password) {
+      this.noti.error('Escribe tu correo y tu contraseña.');
+      return;
+    }
     this.cargando = true;
     this.loginService.login(this.modelo).subscribe({
       next: () => this.router.navigate(['/main']),
-      error: () => {
+      error: (e: HttpErrorResponse) => {
         this.cargando = false;
-        this.noti.error('Credenciales incorrectas.');
+        // Cada causa con su mensaje: así se distingue una clave errada de un problema de conexión
+        if (e.status === 401) {
+          this.noti.error('El correo o la contraseña no coinciden con un administrador activo.', 'Credenciales incorrectas');
+        } else if (e.status === 0) {
+          this.noti.error(`No se pudo conectar con el servidor (${environment.url_api}). Verifica que la API esté en ejecución.`, 'Sin conexión');
+        } else {
+          this.noti.error(`El servidor respondió con un error (${e.status}). Revisa la consola de la API.`, 'Error del servidor');
+        }
       },
     });
   }

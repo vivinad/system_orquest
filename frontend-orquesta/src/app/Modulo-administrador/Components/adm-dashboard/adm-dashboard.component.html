@@ -1,29 +1,216 @@
-<h1>Resumen general</h1>
+<div class="adm-pagina">
+  <!-- Cabecera -->
+  <header class="adm-cabecera cabecera">
+    <div>
+      <div class="adm-kickers">
+        <span class="adm-pill verde"><span class="adm-punto"></span> Sistema en línea</span>
+        <span class="adm-kicker">Temporada {{ anio }}</span>
+      </div>
+      <h1>¡Hola, {{ nombre }}! <span class="destello" aria-hidden="true">✨</span></h1>
+      <p>Aquí tienes el pulso de la orquesta <strong>Wendy y su Agua Cristalina</strong>: cotizaciones activas, flujo de caja neto y próximos shows contratados.</p>
+    </div>
+    <div class="cabecera-derecha">
+      <label class="selector-mes">
+        <mat-icon>calendar_month</mat-icon>
+        <select [(ngModel)]="mes" aria-label="Periodo">
+          @for (m of meses; track m) { <option [value]="m">{{ etiquetaMes(m) }}</option> }
+          <option value="">Todo el historial</option>
+        </select>
+        <mat-icon class="flecha">expand_more</mat-icon>
+      </label>
+    </div>
+  </header>
 
-<div class="kpis">
-  <mat-card class="kpi">
-    <mat-icon class="ic ing">trending_up</mat-icon>
-    <div><span class="label">Ingresos</span><span class="valor">{{ pen(resumen?.ingresos) }}</span></div>
-  </mat-card>
-  <mat-card class="kpi">
-    <mat-icon class="ic gas">trending_down</mat-icon>
-    <div><span class="label">Gastos</span><span class="valor">{{ pen(resumen?.gastos) }}</span></div>
-  </mat-card>
-  <mat-card class="kpi">
-    <mat-icon class="ic bal">account_balance_wallet</mat-icon>
-    <div><span class="label">Balance</span><span class="valor">{{ pen(resumen?.balance) }}</span></div>
-  </mat-card>
-  <mat-card class="kpi">
-    <mat-icon class="ic pend">pending_actions</mat-icon>
-    <div><span class="label">Cotizaciones pendientes</span><span class="valor">{{ pendientes }}</span></div>
-  </mat-card>
-</div>
+  <!-- KPIs -->
+  <section class="adm-kpis">
+    <article class="adm-tarjeta adm-kpi">
+      <div class="adm-kpi-top">
+        <span class="adm-kpi-label">Ingresos totales</span>
+        <span class="adm-icono tono-verde"><mat-icon>trending_up</mat-icon></span>
+      </div>
+      <div class="adm-kpi-valor"><small>s/</small>{{ monto(ingresos) }}</div>
+      <div class="adm-kpi-pie">
+        @let vi = variacionIngresos;
+        @if (vi !== null) {
+          <span class="adm-chip" [class.tono-verde]="vi >= 0" [class.tono-rosa]="vi < 0">
+            <mat-icon>{{ vi >= 0 ? 'north' : 'south' }}</mat-icon>{{ vi >= 0 ? '+' : '' }}{{ vi }}% vs {{ mesAnteriorCorto }}
+          </span>
+        } @else { <span>Cobros del periodo</span> }
+        @let pi = puntoFinal('ingreso');
+        <svg class="linea verde" viewBox="-2 0 86 26" aria-hidden="true">
+          <polyline [attr.points]="linea('ingreso')" />
+          <circle [attr.cx]="pi.x" [attr.cy]="pi.y" r="2.5" />
+        </svg>
+      </div>
+    </article>
 
-<mat-card class="accesos">
-  <h3>Accesos rápidos</h3>
-  <div class="botones">
-    <button matButton="filled" class="btn-gradiente" routerLink="/main/cotizaciones"><mat-icon>request_quote</mat-icon> Ver cotizaciones</button>
-    <button matButton="outlined" routerLink="/main/catalogo"><mat-icon>library_music</mat-icon> Configurar catálogo</button>
-    <button matButton="outlined" routerLink="/main/finanzas"><mat-icon>payments</mat-icon> Registrar movimiento</button>
+    <article class="adm-tarjeta adm-kpi">
+      <div class="adm-kpi-top">
+        <span class="adm-kpi-label">Gastos operativos</span>
+        <span class="adm-icono tono-rosa"><mat-icon>trending_down</mat-icon></span>
+      </div>
+      <div class="adm-kpi-valor"><small>s/</small>{{ monto(gastos) }}</div>
+      <div class="adm-kpi-pie">
+        <span class="recorte">{{ categoriasGasto }}</span>
+        @let pg = puntoFinal('gasto');
+        <svg class="linea rosa" viewBox="-2 0 86 26" aria-hidden="true">
+          <polyline [attr.points]="linea('gasto')" />
+          <circle [attr.cx]="pg.x" [attr.cy]="pg.y" r="2.5" />
+        </svg>
+      </div>
+    </article>
+
+    <article class="adm-tarjeta adm-kpi">
+      <div class="adm-kpi-top">
+        <span class="adm-kpi-label">Balance neto</span>
+        <span class="adm-icono tono-rosa"><mat-icon>account_balance</mat-icon></span>
+      </div>
+      <div class="adm-kpi-valor txt-rosa"><small>s/</small>{{ monto(balance) }}</div>
+      <div class="adm-kpi-pie">
+        <span class="adm-pill">Margen {{ margen }}%</span>
+        <span class="barra"><span [style.width.%]="margen < 0 ? 0 : margen > 100 ? 100 : margen"></span></span>
+      </div>
+    </article>
+
+    <article class="adm-tarjeta adm-kpi">
+      <div class="adm-kpi-top">
+        <span class="adm-kpi-label">Cotizaciones activas</span>
+        <span class="adm-icono tono-dorado"><mat-icon>description</mat-icon></span>
+      </div>
+      <div class="adm-kpi-valor">{{ activas }} <span class="sufijo">en curso</span></div>
+      <div class="adm-kpi-pie inicio">
+        <span class="adm-chip solido tono-dorado">{{ contar('pendiente') }} {{ contar('pendiente') === 1 ? 'pendiente' : 'pendientes' }}</span>
+        <span class="adm-chip tono-gris">{{ cerradas }} {{ cerradas === 1 ? 'cerrada' : 'cerradas' }}</span>
+      </div>
+    </article>
+  </section>
+
+  <div class="rejilla">
+    <div class="columna">
+      <!-- Cotizaciones por atender -->
+      <section class="adm-tarjeta">
+        <div class="adm-tarjeta-cabecera">
+          <h2><span class="punto-titulo"></span> Cotizaciones por Atender</h2>
+          <div class="filtro">
+            <span>Filtrar:</span>
+            <button type="button" [class.activo]="filtroTabla === 'activas'" (click)="filtroTabla = 'activas'">Todas</button>
+            <button type="button" [class.activo]="filtroTabla === 'pendiente'" (click)="filtroTabla = 'pendiente'">Pendientes ({{ contar('pendiente') }})</button>
+            <button type="button" [class.activo]="filtroTabla === 'confirmada'" (click)="filtroTabla = 'confirmada'">Confirmadas</button>
+          </div>
+        </div>
+
+        <div class="adm-tabla-scroll">
+          <table class="adm-tabla">
+            <thead>
+              <tr><th>Cliente / Evento</th><th>Fecha &amp; Lugar</th><th class="centro">Formato</th><th>Monto estimado</th><th class="centro">Estado</th></tr>
+            </thead>
+            <tbody>
+              @for (c of porAtender; track c.id; let i = $index) {
+                <tr>
+                  <td>
+                    <div class="cliente">
+                      <span class="avatar" [class]="'av' + (i % 3)">{{ iniciales(c.nombreCliente) }}</span>
+                      <div>
+                        <strong>{{ c.nombreCliente }}</strong>
+                        <small>{{ tipoTxt(c) }} • {{ c.horasSolicitadas }} horas</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <strong class="fecha">{{ fechaMedia(c.fechaEvento) }}</strong>
+                    <small class="lugar"><mat-icon>location_on</mat-icon>{{ c.distrito?.nombre || 'Por confirmar' }}</small>
+                  </td>
+                  <td class="centro formato">{{ c.paquete?.nombre || 'Paquete #' + c.paqueteId }}</td>
+                  <td>
+                    <strong class="monto">S/<br>{{ monto(c.total) }}</strong>
+                    @if (c.tieneATratar) { <small class="txt-dorado">+ monto a tratar</small> }
+                  </td>
+                  <td class="centro">
+                    @switch (c.estado) {
+                      @case ('pendiente') { <span class="adm-chip solido tono-dorado">Pendiente</span> }
+                      @case ('confirmada') {
+                        <span class="estado-confirmado">
+                          <span class="adm-punto"></span>
+                          <span>Confirmado @if (pctCobrado(c) > 0) { <br>({{ pctCobrado(c) }}% adelanto) }</span>
+                        </span>
+                      }
+                      @default { <span class="adm-chip tono-azul">Pagado</span> }
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="adm-vacio">{{ cargando ? 'Cargando…' : 'No hay cotizaciones en esta vista.' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="tabla-pie">
+          <span>Mostrando {{ porAtender.length }} de {{ totalTabla }} cotizaciones registradas</span>
+          <a routerLink="/main/cotizaciones" class="ver-todo">Ver todo el registro <mat-icon>arrow_forward</mat-icon></a>
+        </div>
+      </section>
+
+      <!-- Próximas presentaciones -->
+      <section class="adm-tarjeta">
+        <div class="adm-tarjeta-cabecera">
+          <h2><mat-icon class="txt-dorado">event_available</mat-icon> Próximas Presentaciones Confirmadas</h2>
+          <span class="adm-pill verde">Contratos confirmados</span>
+        </div>
+        <div class="proximas">
+          @for (c of proximas; track c.id; let i = $index) {
+            <article class="proxima">
+              <div class="proxima-top">
+                <div>
+                  <span class="proxima-cuando" [class.txt-dorado]="i % 2 === 0" [class.txt-verde]="i % 2 === 1">{{ cuandoTxt(c) }}</span>
+                  <h3>{{ tipoTxt(c) }} · {{ c.nombreCliente }}</h3>
+                </div>
+                <span class="fecha-tile"><small>{{ mesTxt(c) }}</small><b [class.txt-dorado]="i % 2 === 0" [class.txt-verde]="i % 2 === 1">{{ diaNum(c) }}</b></span>
+              </div>
+              <p class="proxima-lugar"><mat-icon>location_on</mat-icon>{{ c.direccionEvento ? c.direccionEvento + ', ' : '' }}{{ c.distrito?.nombre || 'Por confirmar' }}</p>
+              <div class="proxima-pie">
+                <span class="hora"><mat-icon>schedule</mat-icon>{{ horario(c) || 'Hora por confirmar' }}</span>
+                @if (pctCobrado(c) >= 100) {
+                  <span class="adm-chip tono-verde">Cobrado 100%</span>
+                } @else {
+                  <span class="adm-chip solido tono-dorado">Saldo Pendiente: S/ {{ monto(saldo(c), 0) }}</span>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="adm-vacio">No hay presentaciones confirmadas próximamente.</p>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <section class="adm-tarjeta accesos-tarjeta">
+      <div class="adm-tarjeta-cabecera">
+        <h2>Accesos Rápidos</h2>
+        <mat-icon class="txt-rosa">bolt</mat-icon>
+      </div>
+      <nav class="accesos">
+        <a routerLink="/main/cotizaciones" [queryParams]="{ nueva: 1 }" class="acceso">
+          <span class="adm-icono cuadrado tono-rosa"><mat-icon>note_add</mat-icon></span>
+          <span class="acceso-txt"><strong>Nueva Cotización Manual</strong><small>Registrar un cliente atendido en persona</small></span>
+          <mat-icon class="chevron">chevron_right</mat-icon>
+        </a>
+        <a routerLink="/main/finanzas" class="acceso">
+          <span class="adm-icono cuadrado tono-verde"><mat-icon>account_balance_wallet</mat-icon></span>
+          <span class="acceso-txt"><strong>Registrar Ingreso / Gasto</strong><small>Pago a músicos, sonido o adelanto</small></span>
+          <mat-icon class="chevron">chevron_right</mat-icon>
+        </a>
+        <a routerLink="/main/catalogo" class="acceso">
+          <span class="adm-icono cuadrado tono-dorado"><mat-icon>tune</mat-icon></span>
+          <span class="acceso-txt"><strong>Actualizar Catálogo de Tarifas</strong><small>Ajustar paquetes de temporada</small></span>
+          <mat-icon class="chevron">chevron_right</mat-icon>
+        </a>
+        <a routerLink="/main/eventos" class="acceso destacado">
+          <span class="adm-icono cuadrado tono-gris"><mat-icon>add_photo_alternate</mat-icon></span>
+          <span class="acceso-txt"><strong>Publicar Nuevo Flyer</strong><small>Subir a la cartelera de la web</small></span>
+          <mat-icon class="chevron">chevron_right</mat-icon>
+        </a>
+      </nav>
+    </section>
   </div>
-</mat-card>
+</div>

@@ -1,300 +1,399 @@
-<!-- Botón flotante para regresar -->
-<button class="volver-flotante" (click)="volver()" title="Regresar">
-  <mat-icon>arrow_back</mat-icon>
-</button>
-
+<!-- ===== Barra superior ===== -->
 <header class="barra">
+  <button type="button" class="btn-volver" (click)="volver()" matTooltip="Regresar" aria-label="Regresar">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
   <a routerLink="/" class="marca">
-    <img src="logo.png" alt="Agua Cristalina" class="logo-img">
+    <span class="logo-caja"><img src="logo.png" alt="Agua Cristalina"></span>
+    <span class="marca-texto">
+      <span class="kicker">Cotizador en línea</span>
+      <strong>Arma tu orquesta</strong>
+    </span>
   </a>
   <span class="spacer"></span>
+  <button type="button" class="btn-icono" (click)="alternarTema()"
+          [matTooltip]="tema() === 'oscuro' ? 'Tema claro' : 'Tema oscuro'" aria-label="Cambiar tema">
+    <mat-icon>{{ tema() === 'oscuro' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
 </header>
 
 @if (enviado) {
-  <div class="exito">
-    <mat-icon class="check">check_circle</mat-icon>
+  <!-- ===== Cotización enviada ===== -->
+  <div class="exito" [class.con-pdf]="contratoVista">
+    <span class="exito-icono"><mat-icon>check_circle</mat-icon></span>
     <h1>¡Cotización enviada!</h1>
-    <p>Tu folio es <strong>#{{ folio }}</strong>. Nos pondremos en contacto contigo muy pronto.</p>
+    <p>Tu folio es <strong>#{{ folio }}</strong>. Nos pondremos en contacto contigo muy pronto para confirmar la fecha.</p>
+
+    @if (aTratar) {
+      <div class="a-tratar">
+        <mat-icon>info</mat-icon>
+        <div>
+          <strong>Hay detalles que se coordinan directamente</strong>
+          <p>{{ motivoATratar }}</p>
+          <a [href]="waATratar" target="_blank" rel="noopener" class="btn-wa-exito"><mat-icon>chat</mat-icon> Escríbenos por WhatsApp</a>
+        </div>
+      </div>
+    }
+
+    @if (contratoVista) {
+      <!-- Contrato visible en la página (no se pierde al descargarlo) -->
+      <div class="contrato-visor">
+        <div class="visor-cab">
+          <span><mat-icon>description</mat-icon> {{ nombreContrato }}</span>
+          <span class="visor-acciones">
+            <button type="button" class="btn-visor" (click)="bajarArchivo()"><mat-icon>download</mat-icon> Descargar PDF</button>
+            <a class="btn-visor" [href]="contratoUrl" target="_blank" rel="noopener"><mat-icon>open_in_new</mat-icon> Abrir</a>
+          </span>
+        </div>
+        <iframe [src]="contratoVista" title="Contrato"></iframe>
+      </div>
+    }
+
     <div class="acciones-exito">
-      <button matButton="filled" class="btn-gradiente" [disabled]="descargando" (click)="descargarContrato()">
-        <mat-icon>description</mat-icon>
-        @if (descargando) { Generando… } @else { Descargar contrato }
-      </button>
-      <a routerLink="/" matButton="outlined">Volver al inicio</a>
+      @if (!contratoVista) {
+        <button type="button" class="btn-principal" [disabled]="descargando" (click)="descargarContrato()">
+          <mat-icon>description</mat-icon>
+          @if (descargando) { Generando… } @else { Ver y descargar contrato }
+        </button>
+      }
+      <a routerLink="/" class="btn-secundario">Volver al inicio</a>
     </div>
   </div>
 } @else {
-  <div class="layout">
-    <div class="pasos">
-      <mat-stepper orientation="horizontal" [linear]="true" #stepper
-                   (selectionChange)="pasoActual = $event.selectedIndex">
+  <div class="cotizador">
+    <!-- ===== Pestañas de pasos ===== -->
+    <nav class="pasos-tabs" aria-label="Pasos de la cotización">
+      @for (p of pasos; track p.titulo; let i = $index) {
+        <button type="button" class="paso-tab"
+                [class.activo]="i === paso" [class.hecho]="i < paso && puedeAvanzar(i)"
+                [disabled]="!puedeIrA(i)" (click)="irAPaso(i)">
+          <span class="paso-num">
+            @if (i < paso && puedeAvanzar(i)) { <mat-icon>check</mat-icon> } @else { {{ i + 1 }} }
+          </span>
+          <span class="paso-texto">
+            <small>Paso {{ i + 1 }}</small>
+            <strong>{{ p.titulo }}</strong>
+          </span>
+        </button>
+      }
+    </nav>
 
-        <!-- Paso 1: ¿Cuántos integrantes? -->
-        <mat-step label="¿Cuántos integrantes deseas?" [completed]="!!paqueteId">
-          <h3>¿Cuántos integrantes deseas?</h3>
-          <p class="sub">Elige una formación. Te mostramos qué integrantes incluye cada una.</p>
-          <mat-radio-group class="paquetes" [(ngModel)]="paqueteId" (ngModelChange)="recalcular()">
-            @for (p of paquetes; track p.id) {
-              <mat-card class="paquete" [class.sel]="paqueteId === p.id"
-                        (click)="paqueteId = p.id; recalcular()">
-                <div class="paquete-top">
-                  <div class="num-int">
-                    <span class="num">{{ p.numIntegrantes }}</span>
-                    <small>integrantes</small>
-                  </div>
-                  <mat-radio-button [value]="p.id"></mat-radio-button>
-                </div>
-                <div class="info">
-                  <strong>{{ p.nombre }}</strong>
-                  <p class="desc"><mat-icon>groups</mat-icon> Incluye: {{ p.descripcion }}</p>
-                </div>
-              </mat-card>
-            }
-          </mat-radio-group>
+    <div class="layout">
+      <!-- ===== Contenido del paso ===== -->
+      <section class="panel">
+        @switch (paso) {
 
-          @if (!paqueteId) {
-            <p class="nota">
-              <mat-icon>lock</mat-icon>
-              Elige una formación para habilitar los siguientes pasos.
-            </p>
-          }
-        </mat-step>
-
-        <!-- Paso 2: Tu evento -->
-        <mat-step label="Tu evento" [completed]="datosEventoOk">
-          <h3>Cuéntanos de tu evento</h3>
-          <div class="campos">
-            <mat-form-field appearance="outline">
-              <mat-label>Distrito del evento</mat-label>
-              <mat-icon matIconPrefix>location_on</mat-icon>
-              <mat-select [(ngModel)]="distritoId" (ngModelChange)="recalcular()" panelClass="panel-distritos">
-                @for (d of distritos; track d.id) {
-                  <mat-option [value]="d.id">{{ d.nombre }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="ancho">
-              <mat-label>Ubicación exacta del evento</mat-label>
-              <mat-icon matIconPrefix>place</mat-icon>
-              <input matInput [(ngModel)]="direccionEvento" required
-                     placeholder="Nombre del local o dirección exacta">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha del evento</mat-label>
-              <mat-icon matIconPrefix>event</mat-icon>
-              <input matInput [matDatepicker]="picker" [min]="hoy"
-                     [(ngModel)]="fechaEvento" (dateChange)="fechaCambiada()">
-              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Hora de inicio</mat-label>
-              <mat-icon matIconPrefix>access_time</mat-icon>
-              <input matInput type="time" [(ngModel)]="horaInicio" required>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Tipo de evento</mat-label>
-              <mat-icon matIconPrefix>celebration</mat-icon>
-              <mat-select [(ngModel)]="tipoEvento">
-                @for (t of tiposEvento; track t) {
-                  <mat-option [value]="t">{{ t }}</mat-option>
-                }
-              </mat-select>
-              <mat-hint>Nos ayuda a elegir la vestimenta adecuada</mat-hint>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Horas de show</mat-label>
-              <mat-icon matIconPrefix>schedule</mat-icon>
-              <input matInput type="number" [min]="minHoras" [(ngModel)]="horas"
-                     (ngModelChange)="recalcular()">
-              <span matTextSuffix>h</span>
-            </mat-form-field>
-          </div>
-
-          @if (fechaEvento) {
-            <p class="nota">
-              <mat-icon>info</mat-icon>
-              {{ esFinDeSemana
-                ? 'Sábados y domingos: mínimo 5 horas (4 horas se coordina aparte).'
-                : 'De lunes a viernes: mínimo 3 horas.' }}
-            </p>
-          }
-
-          <div class="acciones-paso">
-            <button matButton matStepperPrevious>Atrás</button>
-          </div>
-        </mat-step>
-
-        <!-- Paso 3: Extras -->
-        <mat-step label="Músicos y servicios extra" [completed]="true" optional>
-          <h3>¿Agregar más músicos?</h3>
-          <p class="sub">Cada músico se cobra una sola vez por el evento.</p>
-          <div class="chips musicos">
-            @for (m of musicos; track m.id) {
-              <div class="chip" [class.sel]="(cantidades[m.id] || 0) > 0"
-                   (click)="toggleMusico(m, !((cantidades[m.id] || 0) > 0))">
-                <mat-icon class="chip-check">
-                  {{ (cantidades[m.id] || 0) > 0 ? 'check_circle' : 'radio_button_unchecked' }}
-                </mat-icon>
-                <span class="chip-nombre">{{ m.nombre }}</span>
-                <span class="badge" [class.viento]="m.tipo === 'viento'">{{ m.tipo }}</span>
-                <span class="precio-mini">+{{ pen(m.precioAdicional) }}</span>
-              </div>
-            }
-          </div>
-
-          <h3 class="mt-3">Servicios adicionales</h3>
-          <div class="chips servicios">
-            @for (s of servicios; track s.id) {
-              <div class="chip" [class.sel]="serviciosSel[s.id]" (click)="toggleServicio(s, !serviciosSel[s.id])">
-                <mat-icon class="chip-check">
-                  {{ serviciosSel[s.id] ? 'check_circle' : 'radio_button_unchecked' }}
-                </mat-icon>
-                <span class="chip-nombre">{{ s.nombre }}</span>
-                @if (s.telefonoContacto) { <small>· WhatsApp {{ s.telefonoContacto }}</small> }
-              </div>
-            }
-          </div>
-          @for (s of servicios; track s.id) {
-            @if (esProyector(s) && serviciosSel[s.id]) {
-              <p class="tip"><mat-icon>tips_and_updates</mat-icon> ¿Sabías que también ofrecemos edición de video? Márcala abajo.</p>
-            }
-          }
-
-          <div class="acciones-paso">
-            <button matButton matStepperPrevious>Atrás</button>
-          </div>
-        </mat-step>
-
-        <!-- Paso 4: Contacto -->
-        <mat-step label="Tus datos">
-          <h3>¿A quién contactamos?</h3>
-          <div class="campos">
-            <mat-form-field appearance="outline">
-              <mat-label>Nombre completo</mat-label>
-              <input matInput [(ngModel)]="nombreCliente" required>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Teléfono / WhatsApp</mat-label>
-              <input matInput [(ngModel)]="telefonoCliente" required
-                     maxlength="9" inputmode="numeric"
-                     (ngModelChange)="telefonoCliente = soloDigitos($event, 9)">
-              <mat-hint>9 dígitos</mat-hint>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Correo (opcional)</mat-label>
-              <input matInput type="email" [(ngModel)]="emailCliente">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>DNI</mat-label>
-              <input matInput [(ngModel)]="dniCliente" required
-                     maxlength="8" inputmode="numeric"
-                     (ngModelChange)="dniCliente = soloDigitos($event, 8)">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="ancho">
-              <mat-label>Dirección (para el contrato)</mat-label>
-              <input matInput [(ngModel)]="direccionCliente" required>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="ancho">
-              <mat-label>Observaciones (opcional)</mat-label>
-              <textarea matInput rows="2" [(ngModel)]="observaciones"></textarea>
-            </mat-form-field>
-          </div>
-
-          <div class="acciones-paso">
-            <button matButton matStepperPrevious>Atrás</button>
-          </div>
-        </mat-step>
-      </mat-stepper>
-    </div>
-
-    <!-- Resumen en vivo -->
-    <aside class="resumen">
-     <div class="resumen-sticky">
-      <mat-card>
-        <h3><mat-icon>receipt_long</mat-icon> Resumen</h3>
-
-        @if (!datosEventoOk) {
-          @if (paqueteSel(); as p) {
-            <div class="linea"><span>{{ p.nombre }}</span><span>{{ pen(p.precioBase) }}</span></div>
-
-            @if (distritoSel(); as d) {
-              @if (d.costoMovilidad > 0 || d.esATratar) {
-                <div class="linea">
-                  <span>Movilidad · {{ d.nombre }}</span>
-                  <span>{{ d.esATratar ? 'A coordinar' : pen(d.costoMovilidad) }}</span>
-                </div>
-              }
-              @if (d.costoMovilidad > 0) {
-                <p class="nota-movilidad">
-                  <mat-icon>location_on</mat-icon>
-                  Por la distancia del distrito se cobra un adicional de movilidad.
-                </p>
-              }
-              @if (d.esATratar) {
-                <p class="nota-movilidad">
-                  <mat-icon>location_on</mat-icon>
-                  Por la distancia, el costo de movilidad se coordina directamente contigo.
-                </p>
-              }
-            }
-
-            <hr>
-            <div class="linea total"><span>Desde</span><span>{{ pen(p.precioBase + (distritoSel()?.costoMovilidad || 0)) }}</span></div>
-            <p class="vacio">Completa los datos de tu evento para ver el precio final.</p>
-          } @else {
-            <p class="vacio">Elige una formación y completa los datos de tu evento para ver el precio.</p>
-          }
-        } @else if (resultado) {
-          <div class="linea"><span>{{ paqueteSel()?.nombre }} ({{ horas }}h)</span><span>{{ pen(resultado.costoPaquete) }}</span></div>
-          @if (resultado.costoMusicosExtra > 0) {
-            <div class="linea"><span>Músicos adicionales</span><span>{{ pen(resultado.costoMusicosExtra) }}</span></div>
-          }
-          @if (resultado.costoMovilidad > 0) {
-            <div class="linea"><span>Movilidad</span><span>{{ pen(resultado.costoMovilidad) }}</span></div>
-            <p class="nota-movilidad">
-              <mat-icon>location_on</mat-icon>
-              Por la distancia del distrito se cobra un adicional de movilidad.
-            </p>
-          }
-          <hr>
-          <div class="linea total"><span>Total</span><span>{{ pen(resultado.total) }}</span></div>
-          <p class="dia">{{ resultado.diaSemana }}</p>
-
-          @if (resultado.tieneATratar) {
-            <div class="a-tratar">
-              <mat-icon>report_problem</mat-icon>
+          <!-- Paso 1: formación -->
+          @case (0) {
+            <header class="panel-cabecera">
               <div>
-                <strong>Hay puntos a coordinar:</strong>
-                <p>{{ resultado.motivoATratar }}</p>
+                <span class="chip-paso rosa">Paso obligatorio</span>
+                <h2>¿Cuántos integrantes deseas?</h2>
+                <p class="sub">Selecciona la formación ideal para tu celebración. Te mostramos qué incluye cada una.</p>
               </div>
+              <span class="chip-incluye"><mat-icon>check</mat-icon> Incluye equipo de sonido</span>
+            </header>
+
+            <div class="paquetes">
+              @for (p of paquetes; track p.id) {
+                <button type="button" class="paquete" [class.sel]="paqueteId === p.id"
+                        (click)="paqueteId = p.id; recalcular()" [attr.aria-pressed]="paqueteId === p.id">
+                  <span class="paquete-top">
+                    <span class="chip-musicos">{{ p.numIntegrantes }} músicos</span>
+                    <span class="chip-horas">{{ p.horasBase }} h de show</span>
+                    <span class="radio" aria-hidden="true"></span>
+                  </span>
+                  <strong class="paquete-nombre">{{ p.nombre }}</strong>
+                  @if (p.descripcion) {
+                    <span class="paquete-desc"><b>Incluye:</b> {{ p.descripcion }}</span>
+                  }
+                  <span class="paquete-pie">
+                    <small>Equipo de sonido incluido</small>
+                    <span class="paquete-precio">{{ soles(p.precioBase) }}</span>
+                  </span>
+                </button>
+              }
+            </div>
+
+            @if (!paqueteId) {
+              <p class="nota"><mat-icon>lock</mat-icon> Elige una formación para habilitar los siguientes pasos.</p>
+            } @else {
+              <p class="nota verde"><mat-icon>info</mat-icon> El precio final depende de las horas de show, la fecha y el distrito del evento.</p>
+            }
+          }
+
+          <!-- Paso 2: datos del evento -->
+          @case (1) {
+            <header class="panel-cabecera">
+              <div>
+                <span class="chip-paso rosa">Paso 2</span>
+                <h2>Cuéntanos de tu evento</h2>
+                <p class="sub">Con estos datos calculamos la movilidad y las horas de show.</p>
+              </div>
+              <span class="chip-ligero">Lugar y cronograma</span>
+            </header>
+
+            <div class="campos">
+              <label class="campo ancho">
+                <span class="etiqueta">Distrito / zona del evento *</span>
+                <span class="control con-icono">
+                  <mat-icon>location_on</mat-icon>
+                  <select [(ngModel)]="distritoId" (ngModelChange)="recalcular()">
+                    <option [ngValue]="null" disabled>Elige el distrito</option>
+                    @for (d of distritos; track d.id) {
+                      <option [ngValue]="d.id">{{ d.nombre }}</option>
+                    }
+                  </select>
+                </span>
+              </label>
+
+              <label class="campo ancho">
+                <span class="etiqueta">Ubicación exacta o local *</span>
+                <span class="control con-icono">
+                  <mat-icon>storefront</mat-icon>
+                  <input [(ngModel)]="direccionEvento" placeholder="Ej: Local San Martín, Av. Principal 123, casa privada…">
+                </span>
+              </label>
+
+              <label class="campo">
+                <span class="etiqueta">Fecha del evento *</span>
+                <span class="control">
+                  <input type="date" [min]="hoyStr" [(ngModel)]="fechaStr" (change)="fechaCambiada()">
+                </span>
+              </label>
+
+              <label class="campo">
+                <span class="etiqueta">Hora aproximada de inicio *</span>
+                <span class="control">
+                  <input type="time" [(ngModel)]="horaInicio">
+                </span>
+              </label>
+
+              <label class="campo">
+                <span class="etiqueta">Tipo de celebración *</span>
+                <span class="control">
+                  <select [(ngModel)]="tipoEvento">
+                    <option value="" disabled>Elige el tipo</option>
+                    @for (t of tiposEvento; track t) { <option [value]="t">{{ t }}</option> }
+                  </select>
+                </span>
+                <small class="ayuda">Nos ayuda a preparar la vestimenta y el repertorio.</small>
+              </label>
+
+              <label class="campo">
+                <span class="etiqueta">Horas de show musical *</span>
+                <span class="control-horas">
+                  <span class="control corto">
+                    <input type="number" [min]="minHoras" max="12" [(ngModel)]="horas" (ngModelChange)="recalcular()">
+                  </span>
+                  <small class="ayuda">Horas continuas de show (mínimo {{ minHoras }}).</small>
+                </span>
+              </label>
+            </div>
+
+            @if (fechaEvento) {
+              <p class="nota"><mat-icon>info</mat-icon>
+                {{ esFinDeSemana
+                  ? 'Sábados y domingos: mínimo 5 horas (un show de 4 horas se coordina aparte por WhatsApp).'
+                  : 'De lunes a viernes: mínimo 3 horas.' }}
+              </p>
+            }
+          }
+
+          <!-- Paso 3: extras -->
+          @case (2) {
+            <header class="panel-cabecera">
+              <div>
+                <span class="chip-paso verde">Paso 3 · Opcional</span>
+                <h2>¿Agregar más músicos o servicios extra?</h2>
+                <p class="sub">Potencia tu fiesta. Cada músico extra se cobra una sola vez por evento.</p>
+              </div>
+            </header>
+
+            <h3 class="seccion">Sección instrumental adicional</h3>
+            <div class="musicos">
+              @for (m of musicos; track m.id) {
+                <label class="musico" [class.sel]="(cantidades[m.id] || 0) > 0">
+                  <input type="checkbox" [checked]="(cantidades[m.id] || 0) > 0"
+                         (change)="toggleMusico(m, $any($event.target).checked)">
+                  <span class="check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+                  <span class="musico-nombre">{{ m.nombre }}</span>
+                  <span class="tipo" [class.viento]="m.tipo === 'viento'">{{ etiquetaTipo(m) }}</span>
+                  <span class="precio-extra">+{{ soles(m.precioAdicional) }}</span>
+                </label>
+              }
+            </div>
+
+            @if (servicios.length > 0) {
+              <h3 class="seccion">Servicios multimedia &amp; especiales</h3>
+              <div class="servicios">
+                @for (s of servicios; track s.id) {
+                  <label class="servicio" [class.sel]="serviciosSel[s.id]">
+                    <input type="checkbox" [checked]="serviciosSel[s.id]"
+                           (change)="toggleServicio(s, $any($event.target).checked)">
+                    <span class="check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+                    <span class="servicio-texto">
+                      <strong>{{ s.nombre }}</strong>
+                      @if (s.descripcion) { <small>{{ s.descripcion }}</small> }
+                    </span>
+                    <span class="precio-servicio" [class.coordinar]="!s.tienePrecioFijo">
+                      {{ s.tienePrecioFijo ? '+' + soles(s.precio) : 'A coordinar' }}
+                    </span>
+                  </label>
+                }
+              </div>
+            }
+            @for (s of servicios; track s.id) {
+              @if (esProyector(s) && serviciosSel[s.id]) {
+                <p class="nota verde"><mat-icon>tips_and_updates</mat-icon> ¿Sabías que también ofrecemos edición de video? Márcala arriba.</p>
+              }
+            }
+          }
+
+          <!-- Paso 4: contacto -->
+          @case (3) {
+            <header class="panel-cabecera">
+              <div>
+                <span class="chip-paso rosa">Paso 4 · Confirmación</span>
+                <h2>¿A quién contactamos para formalizar?</h2>
+                <p class="sub">Con estos datos preparamos tu contrato en PDF.</p>
+              </div>
+            </header>
+
+            <div class="campos">
+              <label class="campo">
+                <span class="etiqueta">Nombre completo *</span>
+                <span class="control"><input [(ngModel)]="nombreCliente" placeholder="Ej: Carlos Silva Mendoza" autocomplete="name"></span>
+              </label>
+              <label class="campo">
+                <span class="etiqueta">Teléfono / WhatsApp *</span>
+                <span class="control">
+                  <input [(ngModel)]="telefonoCliente" (ngModelChange)="telefonoCliente = soloDigitos($event, 9)"
+                         maxlength="9" inputmode="numeric" placeholder="Ej: 993771153 (9 dígitos)" autocomplete="tel">
+                </span>
+              </label>
+              <label class="campo">
+                <span class="etiqueta">Correo electrónico (opcional)</span>
+                <span class="control"><input type="email" [(ngModel)]="emailCliente" placeholder="tucorreo@ejemplo.com" autocomplete="email"></span>
+              </label>
+              <label class="campo">
+                <span class="etiqueta">DNI (para el contrato) *</span>
+                <span class="control">
+                  <input [(ngModel)]="dniCliente" (ngModelChange)="dniCliente = soloDigitos($event, 8)"
+                         maxlength="8" inputmode="numeric" placeholder="Número de documento">
+                </span>
+              </label>
+              <label class="campo ancho">
+                <span class="etiqueta">Dirección / domicilio para el contrato *</span>
+                <span class="control"><input [(ngModel)]="direccionCliente" placeholder="Ej: Av. Principal 123, Máncora" autocomplete="street-address"></span>
+              </label>
+              <label class="campo ancho">
+                <span class="etiqueta">Observaciones o canciones especiales (opcional)</span>
+                <span class="control"><textarea rows="3" [(ngModel)]="observaciones"
+                  placeholder="Cuéntanos si deseas un tema de entrada especial para los novios o festejados…"></textarea></span>
+              </label>
             </div>
           }
-        } @else if (calculando) {
-          <div class="cargando"><mat-spinner diameter="28"></mat-spinner></div>
         }
-      </mat-card>
 
-      <div class="resumen-acciones">
-        @if (stepper.selectedIndex < 3) {
-          <button matButton="filled" class="btn-siguiente"
-                  [disabled]="!puedeAvanzar(stepper.selectedIndex)" (click)="stepper.next()">
-            Siguiente paso
-          </button>
-        } @else {
-          <button matButton="filled" class="btn-siguiente btn-enviar"
-                  [disabled]="!datosEventoOk || !contactoOk || enviando" (click)="enviar()">
-            @if (enviando) { Enviando… } @else { Finalizar cotización }
-          </button>
+        @if (paso > 0) {
+          <div class="panel-pie">
+            <button type="button" class="btn-atras" (click)="anterior()"><mat-icon>arrow_back</mat-icon> Atrás</button>
+          </div>
         }
-      </div>
-     </div>
-    </aside>
+      </section>
+
+      <!-- ===== Tu presupuesto ===== -->
+      <aside class="presupuesto">
+        <div class="presupuesto-sticky">
+          <div class="tarjeta-presupuesto">
+            <header class="presupuesto-cabecera">
+              <h3><mat-icon>receipt_long</mat-icon> Tu presupuesto</h3>
+              @if (calculando) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <span class="chip-vivo"><span class="punto"></span>En vivo</span>
+              }
+            </header>
+
+            @if (paqueteSel(); as p) {
+              <div class="linea-paquete">
+                <div>
+                  <strong>{{ p.nombre }}</strong>
+                  @if (p.descripcion) { <small>{{ p.descripcion }}</small> }
+                </div>
+                <span>{{ resultado ? pen(resultado.costoPaquete) : pen(p.precioBase) }}</span>
+              </div>
+
+              <ul class="lineas">
+                <li><span>Horas de show</span><span>{{ horas }} horas</span></li>
+                <li><span>Equipo de sonido</span><span class="ok">Incluido</span></li>
+                @if (distritoSel(); as d) {
+                  <li>
+                    <span>Movilidad · {{ d.nombre }}</span>
+                    <span [class.ok]="!d.esATratar && d.costoMovilidad === 0">
+                      {{ d.esATratar ? 'A coordinar' : (d.costoMovilidad > 0 ? pen(d.costoMovilidad) : 'Sin costo') }}
+                    </span>
+                  </li>
+                }
+                @if (resultado && resultado.costoMusicosExtra > 0) {
+                  <li><span>Músicos adicionales</span><span>{{ pen(resultado.costoMusicosExtra) }}</span></li>
+                }
+                @if (cantidadExtras > 0 && !resultado) {
+                  <li><span>Extras elegidos</span><span>{{ cantidadExtras }}</span></li>
+                }
+              </ul>
+
+              <div class="total-caja">
+                <span class="total-label">Inversión total estimada</span>
+                <div class="total-fila">
+                  <small>{{ resultado ? 'Total' : 'Desde' }}</small>
+                  <strong>{{ pen(montoEstimado) }}</strong>
+                </div>
+                <small class="total-nota">
+                  Moneda nacional (PEN)@if (resultado) { · {{ resultado.diaSemana }} }
+                </small>
+              </div>
+
+              @if (!datosEventoOk) {
+                <p class="falta">Completa los datos de tu evento para ver el precio final.</p>
+              }
+
+              @if (resultado?.tieneATratar) {
+                <div class="a-tratar">
+                  <mat-icon>report_problem</mat-icon>
+                  <div>
+                    <strong>Hay puntos a coordinar:</strong>
+                    <p>{{ resultado?.motivoATratar }}</p>
+                  </div>
+                </div>
+              }
+            } @else {
+              <p class="vacio">Elige una formación y completa los datos de tu evento para ver el precio.</p>
+            }
+
+            <ul class="garantias">
+              <li><mat-icon>check_circle</mat-icon> Precio calculado al instante</li>
+              <li><mat-icon>check_circle</mat-icon> Contrato en PDF al finalizar</li>
+              <li><mat-icon>check_circle</mat-icon> Separas la fecha con el 30% de adelanto</li>
+            </ul>
+
+            @if (paso < pasos.length - 1) {
+              <button type="button" class="btn-principal" [disabled]="!puedeAvanzar(paso)" (click)="siguiente()">
+                Continuar al siguiente paso <mat-icon>arrow_forward</mat-icon>
+              </button>
+            } @else {
+              <button type="button" class="btn-principal" [disabled]="!datosEventoOk || !contactoOk || enviando" (click)="enviar()">
+                @if (enviando) { Enviando… } @else { Finalizar cotización <mat-icon>send</mat-icon> }
+              </button>
+            }
+            <a [href]="waLink" target="_blank" rel="noopener" class="btn-secundario">
+              <mat-icon>chat</mat-icon> Consultar por WhatsApp
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
 }
 
@@ -302,7 +401,7 @@
 <cl-metodos-pago />
 
 <!-- ===== WhatsApp flotante ===== -->
-@if (pasoActual === 1 && fechaEvento && esFinDeSemana && !enviado) {
+@if (paso === 1 && fechaEvento && esFinDeSemana && !enviado) {
   <div class="wa-burbuja">
     ¿Evento de 4 horas? Escríbenos aquí
     <span class="wa-burbuja-flecha"></span>

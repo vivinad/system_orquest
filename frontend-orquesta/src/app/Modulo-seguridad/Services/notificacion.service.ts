@@ -32,4 +32,27 @@ export class NotificacionService {
     });
     return r.isConfirmed;
   }
+
+  /**
+   * Pide un monto (S/) con tres salidas: registrar el monto, continuar sin registrar, o cancelar.
+   * Devuelve { accion: 'registrar' | 'omitir' | 'cancelar', monto }.
+   */
+  async pedirMonto(opciones: {
+    titulo: string; texto: string; sugerido?: number; registrar?: string; omitir?: string;
+  }): Promise<{ accion: 'registrar' | 'omitir' | 'cancelar'; monto: number }> {
+    const r = await Swal.fire({
+      icon: 'question', title: opciones.titulo, html: opciones.texto,
+      input: 'number', inputValue: opciones.sugerido ? String(Math.round(opciones.sugerido * 100) / 100) : '',
+      inputAttributes: { min: '0', step: '0.01', placeholder: 'Monto en S/' },
+      showDenyButton: true, showCancelButton: true,
+      confirmButtonText: opciones.registrar ?? 'Registrar pago',
+      denyButtonText: opciones.omitir ?? 'Solo cambiar estado',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#f2405b', denyButtonColor: '#6b7185', cancelButtonColor: '#9e9e9e',
+      inputValidator: v => (!v || Number(v) <= 0 ? 'Ingresa un monto mayor a 0' : null),
+    });
+    if (r.isConfirmed) return { accion: 'registrar', monto: Number(r.value) };
+    if (r.isDenied) return { accion: 'omitir', monto: 0 };
+    return { accion: 'cancelar', monto: 0 };
+  }
 }

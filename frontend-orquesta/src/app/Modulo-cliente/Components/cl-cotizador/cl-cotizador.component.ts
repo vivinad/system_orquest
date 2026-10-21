@@ -1,19 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { Location } from '@angular/common';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DOCUMENT, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatCardModule } from '@angular/material/card';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { MaeCatalogoService } from '../../../Modulo-maestros/Services/mae-catalogo.service';
 import { Paquete, Distrito, MusicoAdicional, ServicioExtra } from '../../../Modulo-maestros/Models/mae-catalogo.model';
@@ -21,25 +13,66 @@ import { ClCotizacionService } from '../../Services/cl-cotizacion.service';
 import { NotificacionService } from '../../../Modulo-seguridad/Services/notificacion.service';
 import { CotizacionRequest, CotizacionResultado } from '../../Models/cl-cotizacion.model';
 import { ClMetodosPagoComponent } from '../cl-metodos-pago/cl-metodos-pago.component';
+import { TemaService } from '../../../Modulo-seguridad/Services/tema.service';
 
 @Component({
   selector: 'cl-cotizador',
   standalone: true,
-  providers: [provideNativeDateAdapter()],
-  imports: [
-    FormsModule, RouterLink, MatStepperModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatDatepickerModule,
-    MatCheckboxModule, MatCardModule, MatRadioModule, MatProgressSpinnerModule,
-    ClMetodosPagoComponent,
-  ],
+  imports: [FormsModule, RouterLink, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, ClMetodosPagoComponent],
   templateUrl: './cl-cotizador.component.html',
   styleUrls: ['./cl-cotizador.component.css'],
 })
-export class ClCotizadorComponent implements OnInit {
+export class ClCotizadorComponent implements OnInit, OnDestroy {
   private catalogoService = inject(MaeCatalogoService);
   private cotizacionService = inject(ClCotizacionService);
   private noti = inject(NotificacionService);
   private location = inject(Location);
+  private document = inject(DOCUMENT);
+  private temaService = inject(TemaService);
+  private sanitizer = inject(DomSanitizer);
+
+  // Tema oscuro / claro (el mismo botón que en la página principal)
+  readonly tema = this.temaService.tema;
+  alternarTema(): void {
+    this.temaService.alternar();
+  }
+
+  // ---------- Pasos ----------
+  readonly pasos = [
+    { titulo: 'Formación musical', icono: 'groups' },
+    { titulo: 'Tu evento', icono: 'event' },
+    { titulo: 'Extras & sonido', icono: 'library_music' },
+    { titulo: 'Datos y reserva', icono: 'assignment_ind' },
+  ];
+  paso = 0;
+
+  // Un paso se puede abrir si todos los anteriores están completos
+  puedeIrA(indice: number): boolean {
+    for (let k = 0; k < indice; k++) {
+      if (!this.puedeAvanzar(k)) return false;
+    }
+    return true;
+  }
+  irAPaso(indice: number): void {
+    if (indice === this.paso || !this.puedeIrA(indice)) return;
+    this.paso = indice;
+    this.subirAlInicio();
+  }
+  siguiente(): void {
+    if (this.paso < this.pasos.length - 1 && this.puedeAvanzar(this.paso)) {
+      this.paso++;
+      this.subirAlInicio();
+    }
+  }
+  anterior(): void {
+    if (this.paso > 0) {
+      this.paso--;
+      this.subirAlInicio();
+    }
+  }
+  private subirAlInicio(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   paquetes: Paquete[] = [];
   distritos: Distrito[] = [];
@@ -60,6 +93,17 @@ export class ClCotizadorComponent implements OnInit {
   ];
   horas = 5;
   hoy = new Date();
+  readonly hoyStr = this.formatoFecha(this.hoy);
+
+  // Fecha para el <input type="date"> ('yyyy-mm-dd'); internamente se usa Date
+  get fechaStr(): string {
+    return this.fechaEvento ? this.formatoFecha(this.fechaEvento) : '';
+  }
+  set fechaStr(valor: string) {
+    if (!valor) { this.fechaEvento = null; return; }
+    const [y, m, d] = valor.split('-').map(Number);
+    this.fechaEvento = new Date(y, m - 1, d);
+  }
   cantidades: Record<number, number> = {};
   serviciosSel: Record<number, boolean> = {};
 
@@ -74,12 +118,18 @@ export class ClCotizadorComponent implements OnInit {
   readonly whatsapp = '51993771153';
 
   resultado: CotizacionResultado | null = null;
-  pasoActual = 0; // índice del paso activo del stepper (la burbuja de WhatsApp solo sale en "Tu evento")
   calculando = false;
   enviando = false;
   enviado = false;
   folio: number | null = null;
+  codigoAcceso: string | undefined; // clave para descargar el contrato
   descargando = false;
+  // Contrato generado: se muestra en la misma página con su botón de descarga
+  contratoUrl: string | null = null;
+  contratoVista: SafeResourceUrl | null = null;
+  // Si la cotización tiene puntos "a tratar", se invita a escribir por WhatsApp
+  aTratar = false;
+  motivoATratar = '';
 
   ngOnInit(): void {
     this.catalogoService.listarPaquetes().subscribe(p => (this.paquetes = p));
@@ -140,7 +190,26 @@ export class ClCotizadorComponent implements OnInit {
   }
 
   pen(n: number | undefined | null): string {
-    return 'S/ ' + (n ?? 0).toFixed(2);
+    return 'S/ ' + (n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  // Precio corto para las tarjetas: S/ 1,250
+  soles(n: number | undefined | null): string {
+    return 'S/ ' + (n ?? 0).toLocaleString('es-PE', { maximumFractionDigits: 0 });
+  }
+
+  etiquetaTipo(m: MusicoAdicional): string {
+    return m.tipo === 'viento' ? 'Viento' : 'Ritmo';
+  }
+
+  // Monto que se muestra en "Tu presupuesto": el total calculado o, mientras falten datos, el precio base
+  get montoEstimado(): number {
+    if (this.resultado) return this.resultado.total;
+    const p = this.paqueteSel();
+    return p ? p.precioBase + (this.distritoSel()?.costoMovilidad ?? 0) : 0;
+  }
+  get cantidadExtras(): number {
+    return Object.values(this.cantidades).filter(c => c > 0).length
+      + Object.values(this.serviciosSel).filter(v => v).length;
   }
 
   toggleMusico(m: MusicoAdicional, checked: boolean): void {
@@ -218,6 +287,9 @@ export class ClCotizadorComponent implements OnInit {
         this.enviando = false;
         this.enviado = true;
         this.folio = c.id;
+        this.codigoAcceso = c.codigoAcceso;
+        this.aTratar = !!c.tieneATratar;
+        this.motivoATratar = c.motivoATratar ?? '';
         this.noti.exito('Te contactaremos muy pronto.', '¡Cotización enviada!');
       },
       error: (e) => {
@@ -228,13 +300,37 @@ export class ClCotizadorComponent implements OnInit {
     });
   }
 
+  get nombreContrato(): string { return `Contrato-Agua-Cristalina-${this.folio}.pdf`; }
+
+  bajarArchivo(): void {
+    if (!this.contratoUrl) return;
+    const a = this.document.createElement('a');
+    a.href = this.contratoUrl;
+    a.download = this.nombreContrato;
+    a.click();
+  }
+
+  /** Mensaje de WhatsApp para coordinar lo que quedó "a tratar" */
+  get waATratar(): string {
+    const msg = `Hola, acabo de enviar la cotización #${this.folio} y quiero coordinar los detalles pendientes 🎶`;
+    return `https://wa.me/${this.whatsapp}?text=${encodeURIComponent(msg)}`;
+  }
+
+  ngOnDestroy(): void {
+    if (this.contratoUrl) URL.revokeObjectURL(this.contratoUrl);
+  }
+
   descargarContrato(): void {
     if (!this.folio || this.descargando) return;
     this.descargando = true;
-    this.cotizacionService.descargarContrato(this.folio).subscribe({
+    this.cotizacionService.descargarContrato(this.folio, this.codigoAcceso).subscribe({
       next: blob => {
         this.descargando = false;
-        window.open(URL.createObjectURL(blob), '_blank');
+        if (this.contratoUrl) URL.revokeObjectURL(this.contratoUrl);
+        this.contratoUrl = URL.createObjectURL(blob);
+        this.contratoVista = this.sanitizer.bypassSecurityTrustResourceUrl(this.contratoUrl);
+        // Descarga el archivo y además lo deja visible en la página
+        this.bajarArchivo();
       },
       error: () => {
         this.descargando = false;
